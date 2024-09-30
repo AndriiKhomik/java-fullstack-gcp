@@ -45,7 +45,7 @@ pipeline {
                         echo "USER_NAME=${user_name}" >> env.properties
                     '''
                     script {
-                        def props = readProterties file: 'env.properties'
+                        def props = readProperties file: 'env.properties'
                         env.FRONTEND_VM_IP = props['FRONTEND_VM_IP']
                         env.USER_NAME = props['USER_NAME']
                     }
@@ -56,10 +56,11 @@ pipeline {
             steps {
                 script {
                     unstash 'frontend-artifact'
-                    sh '''
-                        // scp -i /path/to/ssh-key backend/build/libs/*.jar user@vm_ip:/path/to/deploy/
-                        scp -i ${GCP_CREDS} frontend/build/* ${USER_NAME}@${env.FRONTEND_VM_IP}:/var/www/html/                       
-                    '''
+                    withCredentials([sshUserPrivateKey(credentialsId: 'gcp-credentials.json', keyFileVariable: 'GCP_CREDS')]) {
+                        sh '''
+                            scp -i ${GCP_CREDS} frontend/build/* ${USER_NAME}@${env.FRONTEND_VM_IP}:/var/www/html/
+                        '''
+                    }
                 }
             }
         }
