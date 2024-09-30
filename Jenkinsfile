@@ -58,16 +58,16 @@ pipeline {
                     unstash 'frontend-artifact'
                     withCredentials([sshUserPrivateKey(credentialsId: 'gcp-credentials.json', keyFileVariable: 'GCP_CREDS')]) {
                         sh '''
-                            scp -i ${GCP_CREDS} frontend/build/* ${USER_NAME}@${env.FRONTEND_VM_IP}:/var/www/html/
+                            scp -i ${GCP_CREDS} -r build/* ${USER_NAME}@${env.FRONTEND_VM_IP}:/var/www/html/
                         '''
                     }
                 }
             }
         }
     }
-    post {
-        always {
-            cleanWs()
-        }
-    }
+    // post {
+    //     always {
+    //         cleanWs()
+    //     }
+    // }
 }
