@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         GITHUB_REPO = 'https://github.com/AndriiKhomik/java-fullstack-gcp.git'
-        // GCP_CREDS = credentials('gcp-credentials.json') 
+        GCP_CREDS = credentials('gcp-credentials') 
 
         POSTGRES_USER = credentials('postgres_user')
         POSTGRES_PASSWORD = credentials('postgres_password')
@@ -64,6 +64,7 @@ pipeline {
         // stage('Deploy artifacts') {
         //     steps {
         //         script {
+        // use rsync for this purpose !!!!!!!!
         //             unstash 'frontend-artifact'
         //             withCredentials([sshUserPrivateKey(credentialsId: 'jenkins', keyFileVariable: 'SSH_KEY')]) {
         //                 sh '''
