@@ -12,6 +12,10 @@ resource "google_compute_instance" "webserver" {
     }
   }
 
+  metadata = {
+    ssh-keys = "jenkins:${file("id_rsa.pub")}"
+  }
+
   network_interface {
     network    = var.google_compute_network
     subnetwork = var.google_compute_subnetwork

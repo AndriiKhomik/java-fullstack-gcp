@@ -38,7 +38,7 @@ pipeline {
                 dir('terraform') {
                     sh '''
                         terraform init
-                        terraform apply -auto-approve
+                        terraform apply -auto-approve -var "public_key_file=id_rsa.pub"
                         frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
                         user_name=$(terraform output -raw user_name)
                         echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> env.properties
@@ -56,9 +56,9 @@ pipeline {
             steps {
                 script {
                     unstash 'frontend-artifact'
-                    withCredentials([sshUserPrivateKey(credentialsId: 'gcp-credentials.json', keyFileVariable: 'GCP_CREDS')]) {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'jenkins', keyFileVariable: 'SSH_KEY')]) {
                         sh '''
-                            scp -i ${GCP_CREDS} -r build/* ${USER_NAME}@${env.FRONTEND_VM_IP}:/var/www/html/
+                            scp -i ${SSH_KEY} -r build/* ${USER_NAME}@${env.FRONTEND_VM_IP}:/var/www/html/
                         '''
                     }
                 }
