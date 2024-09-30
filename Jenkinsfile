@@ -28,7 +28,7 @@ pipeline {
             steps {
                 echo 'Building backend...'
                 sh 'gradle build -x test'
-                stash name: 'backend-artifact', includes: '**/target/*.war'
+                stash name: 'backend-artifact', includes: 'build/libs/*.war'
             }
         }
         stage('Build Frontend') {
@@ -41,20 +41,20 @@ pipeline {
                 }
             }
         }
-        stage('Save Artifacts Locally') {
-            steps {
-                unstash 'backend-artifact'
-                unstash 'frontend-artifact'
+        // stage('Save Artifacts Locally') {
+        //     steps {
+        //         unstash 'backend-artifact'
+        //         unstash 'frontend-artifact'
 
-                sh '''
-                    mkdir -p ~/jenkins_artifacts/backend
-                    mkdir -p ~/jenkins_artifacts/frontend
+        //         sh '''
+        //             mkdir -p ~/jenkins_artifacts/backend
+        //             mkdir -p ~/jenkins_artifacts/frontend
 
-                    cp **/target/*.war ~/jenkins_artifacts/backend, allowEmptyArchive: true
-                    cp -r frontend/build/* ~/jenkins_artifacts/frontend, allowEmptyArchive: true
-                '''
-            }
-        }
+        //             cp **/target/*.war ~/jenkins_artifacts/backend, allowEmptyArchive: true
+        //             cp -r frontend/build/* ~/jenkins_artifacts/frontend, allowEmptyArchive: true
+        //         '''
+        //     }
+        // }
         // stage('Provision Infracstructure') {
         //     steps {
         //         dir('terraform') {
