@@ -28,3 +28,8 @@ variable "prefix" {
   type    = string
   default = "main"
 }
+
+variable "machine_type" {
+  type        = string
+  description = "Machine type"
+}

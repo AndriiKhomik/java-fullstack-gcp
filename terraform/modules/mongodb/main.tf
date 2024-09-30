@@ -1,10 +1,10 @@
-resource "google_compute_instance" "webserver" {
-  name                      = "frontend-instance"
+resource "google_compute_instance" "mongodb" {
+  name                      = "mongodb"
   machine_type              = var.machine_type
   zone                      = "${var.region}-b"
   allow_stopping_for_update = true
 
-  tags = ["sshfw", "webserverfw", "icmp-allow"]
+  tags = ["sshfw", "mongodbfw", "icmp-allow"]
 
   boot_disk {
     initialize_params {
@@ -13,7 +13,7 @@ resource "google_compute_instance" "webserver" {
   }
 
   metadata = {
-    ssh-keys = "jenkins:${file("id_rsa.pub")}"
+    ssh-keys = ""
   }
 
   network_interface {
@@ -21,9 +21,7 @@ resource "google_compute_instance" "webserver" {
     subnetwork = var.google_compute_subnetwork
 
     access_config {
-      # nat_ip = var.google_compute_address
+
     }
   }
-
-  metadata_startup_script = file("frontend.sh")
 }
