@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         GITHUB_REPO = 'https://github.com/AndriiKhomik/java-fullstack-gcp.git'
-        GCP_CREDS = credentials('gcp-credentials') 
+        // GCP_CREDS = credentials('gcp-credentials') 
 
         POSTGRES_USER = credentials('postgres_user')
         POSTGRES_PASSWORD = credentials('postgres_password')
