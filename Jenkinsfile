@@ -14,7 +14,7 @@ pipeline {
     }
 
     tools {
-        nodejs 'NodeJS 16.x'
+        nodejs 'NodeJS 14.x'
         gradle 'Gradle 7.5'
     }
 
@@ -24,13 +24,13 @@ pipeline {
                 checkout scm
             }
         }
-        // stage('Build Backend') {
-        //     steps {
-        //         echo 'Building backend...'
-        //         sh 'gradle build -x test'
-        //         stash name: 'backend-artifact', includes: '**/target/*.war'
-        //     }
-        // }
+        stage('Build Backend') {
+            steps {
+                echo 'Building backend...'
+                sh 'gradle build -x test'
+                stash name: 'backend-artifact', includes: '**/target/*.war'
+            }
+        }
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
@@ -41,26 +41,40 @@ pipeline {
                 }
             }
         }
-        stage('Provision Infracstructure') {
+        stage('Save Artifacts Locally') {
             steps {
-                dir('terraform') {
-                    sh '''
-                        terraform init
-                        terraform apply -auto-approve
-                        // terraform apply -auto-approve -var "public_key_file=id_rsa.pub"
-                        frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
-                        user_name=$(terraform output -raw user_name)
-                        echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> env.properties
-                        echo "USER_NAME=${user_name}" >> env.properties
-                    '''
-                    script {
-                        def props = readProperties file: 'env.properties'
-                        env.FRONTEND_VM_IP = props['FRONTEND_VM_IP']
-                        env.USER_NAME = props['USER_NAME']
-                    }
-                }
+                unstash 'backend-artifact'
+                unstash 'frontend-artifact'
+
+                sh '''
+                    mkdir -p ~/jenkins_artifacts/backend
+                    mkdir -p ~/jenkins_artifacts/frontend
+
+                    cp **/target/*.war ~/jenkins_artifacts/backend
+                    cp -r frontend/build/* ~/jenkins_artifacts/frontend
+                '''
             }
         }
+        // stage('Provision Infracstructure') {
+        //     steps {
+        //         dir('terraform') {
+        //             sh '''
+        //                 terraform init
+        //                 terraform apply -auto-approve
+        //                 // terraform apply -auto-approve -var "public_key_file=id_rsa.pub"
+        //                 frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
+        //                 user_name=$(terraform output -raw user_name)
+        //                 echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> env.properties
+        //                 echo "USER_NAME=${user_name}" >> env.properties
+        //             '''
+        //             script {
+        //                 def props = readProperties file: 'env.properties'
+        //                 env.FRONTEND_VM_IP = props['FRONTEND_VM_IP']
+        //                 env.USER_NAME = props['USER_NAME']
+        //             }
+        //         }
+        //     }
+        // }
         // stage('Deploy artifacts') {
         //     steps {
         //         script {
