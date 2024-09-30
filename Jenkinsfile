@@ -50,8 +50,8 @@ pipeline {
                     mkdir -p ~/jenkins_artifacts/backend
                     mkdir -p ~/jenkins_artifacts/frontend
 
-                    cp **/target/*.war ~/jenkins_artifacts/backend
-                    cp -r frontend/build/* ~/jenkins_artifacts/frontend
+                    cp **/target/*.war ~/jenkins_artifacts/backend, allowEmptyArchive: true
+                    cp -r frontend/build/* ~/jenkins_artifacts/frontend, allowEmptyArchive: true
                 '''
             }
         }
@@ -89,9 +89,9 @@ pipeline {
         //     }
         // }
     }
-    post {
-        always {
-            cleanWs()
-        }
-    }
+    // post {
+    //     always {
+    //         cleanWs()
+    //     }
+    // }
 }
