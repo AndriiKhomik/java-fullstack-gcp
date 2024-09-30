@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         GITHUB_REPO = 'https://github.com/AndriiKhomik/java-fullstack-gcp.git'
-         GCP_CREDS = credentials('gcp-credentials.json') 
+        // GCP_CREDS = credentials('gcp-credentials.json') 
     }
 
     tools {
