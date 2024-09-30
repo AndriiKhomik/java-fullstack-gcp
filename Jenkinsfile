@@ -29,7 +29,7 @@ pipeline {
                 dir('frontend') {
                     echo 'Building frontend...'
                     sh 'npm run build'
-                    stash name: 'frontend-artifact', name: 'build'
+                    stash name: 'frontend-artifact', includes: 'build/**/*'
                 }
             }
         }
