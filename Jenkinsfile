@@ -30,7 +30,7 @@ pipeline {
                     sh '''
                         terraform init
                         terraform apply -auto-approve
-                        // terraform apply -auto-approve -var "public_key_file=id_rsa.pub"
+                        # terraform apply -auto-approve -var "public_key_file=id_rsa.pub"
                         frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
                         user_name=$(terraform output -raw user_name)
                         echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> env.properties
