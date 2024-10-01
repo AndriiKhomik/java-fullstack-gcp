@@ -36,11 +36,11 @@ pipeline {
                         echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> env.properties
                         echo "USER_NAME=${user_name}" >> env.properties
                     '''
-                    script {
-                        def props = readProperties file: 'env.properties'
-                        env.FRONTEND_VM_IP = props['FRONTEND_VM_IP']
-                        env.USER_NAME = props['USER_NAME']
-                    }
+                    // script {
+                    //     def props = readProperties file: 'env.properties'
+                    //     env.FRONTEND_VM_IP = props['FRONTEND_VM_IP']
+                    //     env.USER_NAME = props['USER_NAME']
+                    // }
                 }
             }
         }
