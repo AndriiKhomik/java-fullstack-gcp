@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         GITHUB_REPO = 'https://github.com/AndriiKhomik/java-fullstack-gcp.git'
-        GCP_CREDS = credentials('gcp-credentials.json') 
+        // GCP_CREDS = credentials('gcp-credentials.json') 
 
         POSTGRES_USER = credentials('postgres_user')
         POSTGRES_PASSWORD = credentials('postgres_password')
@@ -24,7 +24,7 @@ pipeline {
                 checkout scm
             }
         }
-                stage('Provision Infracstructure') {
+        stage('Provision Infracstructure') {
             steps {
                 dir('terraform') {
                     sh '''
