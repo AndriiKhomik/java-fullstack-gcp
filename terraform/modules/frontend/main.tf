@@ -25,5 +25,5 @@ resource "google_compute_instance" "webserver" {
     }
   }
 
-  metadata_startup_script = file("frontend.sh")
+  # metadata_startup_script = file("frontend.sh")
 }
