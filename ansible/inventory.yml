@@ -21,3 +21,11 @@ tomcatservers:
       ansible_user: andrii_khomik
       ansible_ssh_private_key: ~/.ssh/my-gcp-key
       ansible_connection: ssh 
+
+redisservers:
+  hosts:
+    redis_server:
+      ansible_host: 35.247.25.109
+      ansible_user: andrii_khomik
+      ansible_ssh_private_key: ~/.ssh/my-gcp-key
+      ansible_connection: ssh 

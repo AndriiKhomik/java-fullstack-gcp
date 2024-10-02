@@ -1,0 +1,8 @@
+---
+- name: use redis role playbook
+  hosts: redisservers
+  become: true
+
+  roles:
+    - role: redis
+      system_manager: andrii.khomik@gmail.com
