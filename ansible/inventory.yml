@@ -1,0 +1,9 @@
+webservers:
+  hosts:
+    remote_server:
+      ansible_host: 34.82.200.152
+      ansible_user: andrii_khomik
+      ansible_ssh_private_key: ~/.ssh/my-gcp-key
+      ansible_connection: ssh    
+    # localhost:
+    #   ansible_connection: local

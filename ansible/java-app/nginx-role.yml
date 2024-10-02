@@ -1,0 +1,9 @@
+---
+- name: use nginx role playbook
+  hosts: webservers
+  become: true
+
+  roles:
+    - role: nginx
+      system_manager: andrii.khomik@gmail.com
+      
