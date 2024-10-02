@@ -1,0 +1,8 @@
+---
+- name: use mongodb role playbook
+  hosts: mongoservers
+  become: true
+
+  roles:
+    - role: mongodb
+      system_manager: andrii.khomik@gmail.com

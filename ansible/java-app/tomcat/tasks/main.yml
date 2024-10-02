@@ -1,0 +1,83 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install Java
+  apt:
+    name: default-jdk
+    state: present
+
+- name: Create group for Tomcat
+  group:
+    name: "{{ tomcat_group }}"
+    state: present
+  
+- name: Create a user for Tomcat
+  user:
+    name: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+    home: "{{ tomcat_install_dir }}"
+    shell: /bin/false
+    state: present
+
+- name: Download Tomcat
+  get_url:
+    url: "{{ tomcat_download_url }}"
+    dest: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
+
+- name: Create Tomcat installation directory
+  file:
+    path: "{{ tomcat_install_dir }}"
+    state: directory
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+
+
+- name: Extract Tomcat
+  unarchive:
+    src: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
+    dest: "{{ tomcat_install_dir }}"
+    remote_src: yes
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+    creates: "{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"
+
+- name: Create symbolic link for easier access
+  file:
+    src: "{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"
+    dest: "{{ tomcat_install_dir }}/latest"
+    state: link
+
+- name: Change ownership of Tomcat directory
+  file:
+    path: "{{ tomcat_install_dir }}/latest"
+    state: directory
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+    recurse: yes
+
+
+- name: Allow Tomcat to be executed as a service
+  copy:
+    dest: /etc/systemd/system/tomcat.service
+    content: |
+      [Unit]
+      Description=Apache Tomcat Web Application Container
+      After=network.target
+
+      [Service]
+      Type=forking
+
+      User={{ tomcat_user }}
+      Group={{ tomcat_group }}
+      Environment=JAVA_HOME=/usr/lib/jvm/default-java
+      Environment=CATALINA_PID={{ tomcat_install_dir }}/latest/temp/tomcat.pid
+      Environment=CATALINA_HOME={{ tomcat_install_dir }}/latest
+      Environment=CATALINA_BASE={{ tomcat_install_dir }}/latest
+      ExecStart={{ tomcat_install_dir }}/latest/bin/startup.sh
+      ExecStop={{ tomcat_install_dir }}/latest/bin/shutdown.sh
+      Restart=on-failure
+
+      [Install]
+      WantedBy=multi-user.target
