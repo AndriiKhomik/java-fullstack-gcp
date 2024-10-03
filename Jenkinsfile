@@ -56,12 +56,12 @@ pipeline {
                 }
             }
         }
-        stage('Archive artifact') {
-            steps {
-                unstash 'frontend-artifact'
-                archiveArtifacts(artifacts: build, followSymlinks: false)
-            }
-        }
+        // stage('Archive artifact') {
+        //     steps {
+        //         unstash 'frontend-artifact'
+        //         archiveArtifacts(artifacts: build, followSymlinks: false)
+        //     }
+        // }
         // stage('Save Artifacts Locally') {
         //     steps {
         //         unstash 'backend-artifact'
