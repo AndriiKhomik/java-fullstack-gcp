@@ -24,21 +24,21 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Provision Infracstructure') {
-            steps {
-                dir('terraform') {
-                    sh '''
-                        terraform init
-                        terraform apply -auto-approve
-                        # terraform apply -auto-approve -var "public_key_file=id_rsa.pub"
-                        frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
-                        user_name=$(terraform output -raw user_name)
-                        echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> env.properties
-                        echo "USER_NAME=${user_name}" >> env.properties
-                    '''
-                }
-            }
-        }
+        // stage('Provision Infracstructure') {
+        //     steps {
+        //         dir('terraform') {
+        //             sh '''
+        //                 terraform init
+        //                 terraform apply -auto-approve
+        //                 # terraform apply -auto-approve -var "public_key_file=id_rsa.pub"
+        //                 frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
+        //                 user_name=$(terraform output -raw user_name)
+        //                 echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> env.properties
+        //                 echo "USER_NAME=${user_name}" >> env.properties
+        //             '''
+        //         }
+        //     }
+        // }
         // stage('Build Backend') {
         //     steps {
         //         echo 'Building backend...'
@@ -46,16 +46,22 @@ pipeline {
         //         stash name: 'backend-artifact', includes: 'build/libs/*.war'
         //     }
         // }
-        // stage('Build Frontend') {
-        //     steps {
-        //         dir('frontend') {
-        //             echo 'Building frontend...'
-        //             sh 'npm install'
-        //             sh 'npm run build'
-        //             stash name: 'frontend-artifact', includes: 'build/**/*'
-        //         }
-        //     }
-        // }
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    echo 'Building frontend...'
+                    sh 'npm install'
+                    sh 'npm run build'
+                    stash name: 'frontend-artifact', includes: 'build/**/*'
+                }
+            }
+        }
+        stage('Archive artifact') {
+            steps {
+                unstash 'frontend-artifact'
+                archiveArtifacts(artifacts: build, followSymlinks: false)
+            }
+        }
         // stage('Save Artifacts Locally') {
         //     steps {
         //         unstash 'backend-artifact'

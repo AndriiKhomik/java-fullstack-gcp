@@ -27,3 +27,12 @@ resource "google_compute_instance" "webserver" {
 
   # metadata_startup_script = file("frontend.sh")
 }
+
+# resource "null_resource" "run_ansible" {
+#   depends_on = [  ]
+
+#   provisioner "local-exec" {
+#     command = "ansible-playbook -i ~/Desktop/java-fullstack-gcp/ansible/inventory.yml ~/Desktop/java-fullstack-gcp/ansible/java-app/nginxrole.yml"
+#     working_dir = path.module
+#   }
+# }
