@@ -59,7 +59,7 @@ pipeline {
         }
         stage('archive') {
             steps {
-                archiveArtifacts(artifacts: '**/*', followSymlinks: false)
+                archiveArtifacts(artifacts: 'frontend/build/**/*', followSymlinks: false)
             }
         }
         // stage('Archive artifact') {
