@@ -39,20 +39,24 @@ pipeline {
         //         }
         //     }
         // }
-        // stage('Build Backend') {
-        //     steps {
-        //         echo 'Building backend...'
-        //         sh 'gradle build -x test'
-        //         stash name: 'backend-artifact', includes: 'build/libs/*.war'
-        //     }
-        // }
+        stage('Build Backend') {
+            steps {
+                echo 'Building backend...'
+                sh 'gradle build -x test'
+                stash name: 'backend-artifact', includes: 'build/libs/*.war'
+            }
+        }
+        stage('archive') {
+            steps {
+                archiveArtifacts(artifacts: 'build/libs/**/*', followSymlinks: false)
+            }
+        }
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
                     echo 'Building frontend...'
                     sh 'npm install'
                     sh 'npm run build'
-                    // stash name: 'frontend-artifact', includes: 'build/**/*'
                 }
             }
 
