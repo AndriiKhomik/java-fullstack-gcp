@@ -52,8 +52,14 @@ pipeline {
                     echo 'Building frontend...'
                     sh 'npm install'
                     sh 'npm run build'
-                    stash name: 'frontend-artifact', includes: 'build/**/*'
+                    // stash name: 'frontend-artifact', includes: 'build/**/*'
                 }
+            }
+
+        }
+        stage('archive') {
+            steps {
+                archiveArtifacts(artifacts: 'build', followSymlinks: false)
             }
         }
         // stage('Archive artifact') {
