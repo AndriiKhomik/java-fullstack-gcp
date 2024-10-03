@@ -1,0 +1,92 @@
+---
+- name: Install packages
+  ansible.builtin.apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+      - libpq-dev
+      - python3-psycopg2
+    state: present
+
+- name: Check if PostgreSQL is installed
+  ansible.builtin.stat:
+    path: "{{ postgresql_data_dir }}/pg_hba.conf"
+  register: postgres_data
+
+- name: Restart PostgreSQL configuration
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted
+  become: true
+
+- name: Initialize PostgreSQL
+  ansible.builtin.shell: "{{ postgresql_bin_path }}/initdb -D {{ postgresql_data_dir }}"
+  become: true
+  become_user: "{{ postgres_user }}"
+  when: not postgres_data.stat.exists
+
+- name: Set permissions on PostgreSQL data directory
+  ansible.builtin.file:
+    path: "{{ postgresql_data_dir }}"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_user }}"
+    mode: "0700"
+  become: true
+
+- name: Start and enable service
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Set password for postgres user
+  ansible.builtin.shell: |
+    psql -U postgres -c "ALTER USER postgres WITH PASSWORD '{{ postgres_password }}';"
+  become: true
+  become_user: postgres
+  args:
+    executable: /bin/bash
+  environment:
+    PGPASSWORD: "{{ postgres_password }}"
+  when: postgres_data.stat.exists
+
+- name: Ensure md5 authentication for postgres user
+  ansible.builtin.lineinfile:
+    path: "{{ postgresql_data_dir }}/pg_hba.conf"
+    line: "local   all             postgres                                md5"
+    state: present
+    # validate: "pg_ctl -D {{ postgresql_data_dir }} -t 5 reload"
+  become: true
+
+- name: Set database password environment variable
+  ansible.builtin.shell: "export PGPASSWORD={{ postgres_password }}"
+  args:
+    executable: /bin/bash
+
+- name: Drop and recreate public schema
+  ansible.builtin.shell: |
+    psql -U {{ postgres_user }} -h {{ postgres_host }} -p {{ postgres_port }} -d {{ postgres_db }} -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+  environment:
+    PGPASSWORD: "{{ postgres_password }}"
+  args:
+    executable: /bin/bash
+
+- name: Copy dump file to VM
+  copy:
+    src: files/data.dump
+    dest: /home/andrii_khomik
+    owner: "{{ postgres_user }}"
+    mode: '0755'
+
+- name: Restore database from dump file
+  ansible.builtin.shell: |
+    psql --set ON_ERROR_STOP=off -U {{ postgres_user }} -h {{ postgres_host }} -p {{ postgres_port }} -d {{ postgres_db }} -1 -f /home/andrii_khomik/{{ db_backup_filename }}
+  environment:
+    PGPASSWORD: "{{ postgres_password }}"
+  args:
+    executable: /bin/bash
+
+- name: Unset database password environment variable
+  ansible.builtin.shell: "unset PGPASSWORD"
+  args:
+    executable: /bin/bash

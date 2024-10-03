@@ -1,0 +1,12 @@
+---
+postgres_user: "postgres"
+postgres_password: "password"
+postgres_db: "postgres"
+postgres_host: "localhost"
+postgres_port: "5432"
+postgres_version: "13"
+postgresql_bin_path: "/usr/lib/postgresql/{{ postgres_version }}/bin"
+postgresql_data_dir: "/var/lib/postgresql/{{ postgres_version }}/main"
+ansible_ssh_pipelining: true
+# db_backup_path: "{{ playbook_dir }}/postgres/files" 
+db_backup_filename: "data.dump"
