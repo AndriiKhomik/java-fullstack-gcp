@@ -43,12 +43,12 @@ pipeline {
             steps {
                 echo 'Building backend...'
                 sh 'gradle build -x test'
-                stash name: 'backend-artifact', includes: 'build/libs/*.war'
+                // stash name: 'backend-artifact', includes: 'build/libs/*.war'
             }
         }
         stage('Archive backend') {
             steps {
-                archiveArtifacts(artifacts: 'build/libs/**/*', followSymlinks: false)
+                archiveArtifacts(artifacts: '**/build/libs/*.war', followSymlinks: false)
             }
         }
         stage('Build Frontend') {
@@ -66,7 +66,7 @@ pipeline {
                 dir('frontend') {
                     sh 'tar -czf build.tar.gz build'
                     // archiveArtifacts(artifacts: 'frontend/build/**/*', followSymlinks: false)
-                    archiveArtifacts(artifacts: 'build.zip', followSymlinks: false)
+                    archiveArtifacts(artifacts: 'build.tar.gz', followSymlinks: false)
                 }
             }
         }
