@@ -64,7 +64,7 @@ pipeline {
         stage('Archive frontend') {
             steps {
                 dir('frontend') {
-                    sh 'zip -r build.zip build'
+                    sh 'tar -czf build.tar.gz build'
                     // archiveArtifacts(artifacts: 'frontend/build/**/*', followSymlinks: false)
                     archiveArtifacts(artifacts: 'build.zip', followSymlinks: false)
                 }
