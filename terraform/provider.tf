@@ -9,7 +9,7 @@ terraform {
 
 provider "google" {
   project     = var.project_id
-  # credentials = file("gcp-credentials.json")
+  credentials = file("gcp-credentials.json")
   region      = var.region
   zone        = "${var.region}-c"
 }
