@@ -46,7 +46,7 @@ pipeline {
                 stash name: 'backend-artifact', includes: 'build/libs/*.war'
             }
         }
-        stage('archive') {
+        stage('Archive backend') {
             steps {
                 archiveArtifacts(artifacts: 'build/libs/**/*', followSymlinks: false)
             }
@@ -61,9 +61,13 @@ pipeline {
             }
 
         }
-        stage('archive') {
+        stage('Archive frontend') {
             steps {
-                archiveArtifacts(artifacts: 'frontend/build/**/*', followSymlinks: false)
+                dir('frontend') {
+                    sh 'zip -r build.zip build'
+                    // archiveArtifacts(artifacts: 'frontend/build/**/*', followSymlinks: false)
+                    archiveArtifacts(artifacts: 'build.zip', followSymlinks: false)
+                }
             }
         }
         // stage('Archive artifact') {
