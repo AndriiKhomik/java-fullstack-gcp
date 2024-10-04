@@ -16,6 +16,7 @@ pipeline {
     tools {
         nodejs 'NodeJS 14.x'
         gradle 'Gradle 7.5'
+        maven 'Maven'
     }
 
     stages {
