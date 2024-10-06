@@ -44,8 +44,16 @@ pipeline {
         stage('Build Backend') {
             steps {
                 echo 'Building backend...'
-                sh 'gradle clean build -x test'
-                // stash name: 'backend-artifact', includes: 'build/libs/*.war'
+                withEnv([
+                    "POSTGRES_USER=${env.POSTGRES_USER}",
+                    "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}",
+                    "POSTGRES_DB=${env.POSTGRES_DB}",
+                    "MONGO_INITDB_ROOT_USERNAME=${env.MONGO_INITDB_ROOT_USERNAME}",
+                    "MONGO_INITDB_ROOT_PASSWORD=${env.MONGO_INITDB_ROOT_PASSWORD}",
+                    "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
+                ]) {
+                    sh 'gradle clean build -x test'
+                }
             }
         }
         stage('Archive backend') {
