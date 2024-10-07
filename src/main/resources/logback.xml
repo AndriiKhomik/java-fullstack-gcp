@@ -11,11 +11,9 @@
         <encoder>
             <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</pattern>
         </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <FileNamePattern>${USER_HOME}/logArchiveAll/roll.%d{yyyy-MM-dd}.%i.log.zip</FileNamePattern>
-            <maxFileSize>10MB</maxFileSize>
             <maxHistory>60</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
     </appender>
     <logger name="com.softserve" level="INFO">
