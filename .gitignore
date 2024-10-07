@@ -5,7 +5,6 @@
 /gradle
 /backup
 /src/test/resources/hibernatetest.properties
-/schedule_logs
 *.txt
 
 .terraform/
