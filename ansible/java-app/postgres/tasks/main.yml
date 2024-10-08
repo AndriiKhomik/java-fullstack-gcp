@@ -1,71 +1,186 @@
 ---
 - name: Install packages
   ansible.builtin.apt:
-    name:
-      - postgresql
-      - postgresql-contrib
-      - libpq-dev
-      - python3-psycopg2
+    name: "{{ postgresql_packages }}"
     state: present
 
-- name: Check if PostgreSQL is installed
-  ansible.builtin.stat:
-    path: "{{ postgresql_data_dir }}/pg_hba.conf"
-  register: postgres_data
+- name: Ensure PostgreSQL Python libraries are installed.
+  apt:
+    name: "{{ postgresql_python_library }}"
+    state: present
 
-- name: Restart PostgreSQL configuration
-  ansible.builtin.service:
-    name: postgresql
+- name: Ensure PostgreSQL packages are installed.
+  apt:
+    name: "{{ postgresql_packages }}"
+    state: present
+
+- name: Ensure all configured locales are present.
+  locale_gen: "name={{ item }} state=present"
+  with_items: "{{ postgresql_locales }}"
+  register: locale_gen_result
+
+- name: Force-restart PostgreSQL after new locales are generated.
+  service:
+    name: "{{ postgresql_daemon }}"
     state: restarted
-  become: true
+  when: locale_gen_result.changed
 
-- name: Initialize PostgreSQL
-  ansible.builtin.shell: "{{ postgresql_bin_path }}/initdb -D {{ postgresql_data_dir }}"
-  become: true
-  become_user: "{{ postgres_user }}"
-  when: not postgres_data.stat.exists
+- name: Set PostgreSQL environment variables.
+  template:
+    src: postgres.sh.j2
+    dest: /etc/profile.d/postgres.sh
+    mode: 0644
+  notify: restart postgresql
 
-- name: Set permissions on PostgreSQL data directory
-  ansible.builtin.file:
+- name: Ensure PostgreSQL data directory exists.
+  file:
     path: "{{ postgresql_data_dir }}"
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_user }}"
-    mode: "0700"
-  become: true
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    state: directory
+    mode: 0700
 
-- name: Start and enable service
-  ansible.builtin.service:
-    name: postgresql
-    state: started
-    enabled: true
+- name: Check if PostgreSQL database is initialized.
+  stat:
+    path: "{{ postgresql_data_dir }}/PG_VERSION"
+  register: pgdata_dir_version
 
-- name: Set password for postgres user
-  ansible.builtin.shell: |
-    psql -U postgres -c "ALTER USER postgres WITH PASSWORD '{{ postgres_password }}';"
+- name: Ensure PostgreSQL database is initialized.
+  command: "{{ postgresql_bin_path }}/initdb -D {{ postgresql_data_dir }}"
+  when: not pgdata_dir_version.stat.exists
   become: true
-  become_user: postgres
-  args:
-    executable: /bin/bash
+  become_user: "{{ postgresql_user }}"
+  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Ensure PostgreSQL log directory exists.
+  file:
+    path: "{{ postgresql_effective_log_dir }}"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    state: directory
+    mode: 0700
+
+- name: Configure global settings.
+  lineinfile:
+    dest: "{{ postgresql_config_path }}/postgresql.conf"
+    regexp: "^#?{{ item.option }}.+$"
+    line: "{{ item.option }} = '{{ item.value }}'"
+    state: "{{ item.state | default('present') }}"
+    mode: 0644
+  with_items: "{{ postgresql_global_config_options }}"
+  notify: restart postgresql
+
+- name: Configure host based authentication (if entries are configured).
+  template:
+    src: "pg_hba.conf.j2"
+    dest: "{{ postgresql_conf_dir }}/pg_hba.conf"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: 0600
+  notify: restart postgresql
+  when: postgresql_hba_entries | length > 0
+
+- name: Ensure PostgreSQL unix socket dirs exist.
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: "{{ postgresql_unix_socket_directories_mode }}"
+  with_items: "{{ postgresql_unix_socket_directories }}"
+
+- name: Ensure PostgreSQL is started and enabled on boot.
+  service:
+    name: "{{ postgresql_daemon }}"
+    state: "{{ postgresql_service_state }}"
+    enabled: "{{ postgresql_service_enabled }}"
+
+# Configure PostgreSQL.
+- name: Ensure PostgreSQL users are present.
+  postgresql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password | default(omit) }}"
+    login_host: "{{ item.login_host | default('localhost') }}"
+    login_password: "{{ item.login_password | default(omit) }}"
+    login_user: "{{ item.login_user | default(postgresql_user) }}"
+    login_unix_socket: "{{ item.login_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    port: "{{ item.port | default(omit) }}"
+  with_items: "{{ postgresql_users }}"
+  no_log: "{{ postgres_users_no_log }}"
+  become: true
+  become_user: "{{ postgresql_user }}"
+  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
+  vars:
+    ansible_ssh_pipelining: true
   environment:
-    PGPASSWORD: "{{ postgres_password }}"
-  when: postgres_data.stat.exists
+    PGOPTIONS: "{{ (postgresql_auth_method == 'scram-sha-256') | ternary('-c password_encryption=scram-sha-256', '') }}"
 
-- name: Ensure md5 authentication for postgres user
-  ansible.builtin.lineinfile:
-    path: "{{ postgresql_data_dir }}/pg_hba.conf"
-    line: "local   all             postgres                                md5"
-    state: present
-    # validate: "pg_ctl -D {{ postgresql_data_dir }} -t 5 reload"
+
+# Database setup
+- name: Ensure PostgreSQL databases are present.
+  postgresql_db:
+    name: "{{ item.name }}"
+    # lc_collate: "{{ item.lc_collate | default('en_US.UTF-8') }}"
+    # lc_ctype: "{{ item.lc_ctype | default('en_US.UTF-8') }}"
+    encoding: "{{ item.encoding | default('UTF-8') }}"
+    template: "{{ item.template | default('template0') }}"
+    login_host: "{{ item.login_host | default('localhost') }}"
+    login_password: "{{ item.login_password | default(omit) }}"
+    login_user: "{{ item.login_user | default(postgresql_user) }}"
+    login_unix_socket: "{{ item.login_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    port: "{{ item.port | default(omit) }}"
+    owner: "{{ item.owner | default(postgresql_user) }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ postgresql_databases }}"
   become: true
+  become_user: "{{ postgresql_user }}"
+  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
+  vars:
+    ansible_ssh_pipelining: true 
 
-- name: Set database password environment variable
-  ansible.builtin.shell: "export PGPASSWORD={{ postgres_password }}"
-  args:
-    executable: /bin/bash
+
+# Users Props
+- name: Ensure PostgreSQL users are configured correctly.
+  postgresql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password | default(omit) }}"
+    encrypted: "{{ item.encrypted | default(omit) }}"
+    priv: "{{ item.priv | default(omit) }}"
+    role_attr_flags: "{{ item.role_attr_flags | default(omit) }}"
+    db: "{{ item.db | default(omit) }}"
+    login_host: "{{ item.login_host | default('localhost') }}"
+    login_password: "{{ item.login_password | default(omit) }}"
+    login_user: "{{ item.login_user | default(postgresql_user) }}"
+    login_unix_socket: "{{ item.login_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    port: "{{ item.port | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ postgresql_users }}"
+  no_log: "{{ postgres_users_no_log }}"
+  become: true
+  become_user: "{{ postgresql_user }}"
+  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
+  vars:
+    ansible_ssh_pipelining: true
+  environment:
+    PGOPTIONS: "{{ (postgresql_auth_method == 'scram-sha-256') | ternary('-c password_encryption=scram-sha-256', '') }}"
+
+# - name: Set password for postgres user
+#   ansible.builtin.shell: |
+#     psql -U postgres -c "ALTER USER postgres WITH PASSWORD '{{ postgres_password }}';"
+#   become: true
+#   become_user: postgres
+#   become_method: sudo
+#   args:
+#     executable: /bin/bash
+#   environment:
+#     PGPASSWORD: "{{ postgres_password }}"
+#   when: pgdata_dir_version.stat.exists
 
 - name: Drop and recreate public schema
   ansible.builtin.shell: |
-    psql -U {{ postgres_user }} -h {{ postgres_host }} -p {{ postgres_port }} -d {{ postgres_db }} -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+    psql -U {{ postgresql_user }} -h {{ postgres_host }} -p {{ postgres_port }} -d {{ postgres_db }} -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
   environment:
     PGPASSWORD: "{{ postgres_password }}"
   args:
@@ -75,18 +190,14 @@
   copy:
     src: files/data.dump
     dest: /home/andrii_khomik
-    owner: "{{ postgres_user }}"
+    owner: "{{ postgresql_user }}"
     mode: '0755'
 
 - name: Restore database from dump file
   ansible.builtin.shell: |
-    psql --set ON_ERROR_STOP=off -U {{ postgres_user }} -h {{ postgres_host }} -p {{ postgres_port }} -d {{ postgres_db }} -1 -f /home/andrii_khomik/{{ db_backup_filename }}
+    psql --set ON_ERROR_STOP=off -U {{ postgresql_user }} -h {{ postgres_host }} -p {{ postgres_port }} -d {{ postgres_db }} -1 -f /home/andrii_khomik/{{ db_backup_filename }}
   environment:
     PGPASSWORD: "{{ postgres_password }}"
   args:
     executable: /bin/bash
-
-- name: Unset database password environment variable
-  ansible.builtin.shell: "unset PGPASSWORD"
-  args:
-    executable: /bin/bash
+  notify: restart postgresql
