@@ -35,5 +35,15 @@
      dest: /srv/www/
      owner: www-data
      mode: '0755'
-    
+
+ - name: Restart NGINX service
+   systemd:
+    name: nginx
+    state: restarted
+   
+ - name: Ensure NGINX is running and enabled
+   systemd:
+    name: nginx
+    state: started
+    enabled: yes
 
