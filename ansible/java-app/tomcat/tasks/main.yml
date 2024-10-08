@@ -8,76 +8,46 @@
     name: default-jdk
     state: present
 
-- name: Create group for Tomcat
-  group:
-    name: "{{ tomcat_group }}"
-    state: present
-  
-- name: Create a user for Tomcat
-  user:
-    name: "{{ tomcat_user }}"
-    group: "{{ tomcat_group }}"
-    home: "{{ tomcat_install_dir }}"
-    shell: /bin/false
+- name: Install Tomcat 9
+  apt:
+    name: tomcat9
     state: present
 
-- name: Download Tomcat
-  get_url:
-    url: "{{ tomcat_download_url }}"
-    dest: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
-
-- name: Create Tomcat installation directory
+- name: 4. Create directory for application
   file:
-    path: "{{ tomcat_install_dir }}"
+    path: /var/lib/tomcat9/webapps
+    state: directory
+    owner: tomcat
+    group: tomcat
+
+- name: Ensure that Tomcat is started and enabled
+  service:
+    name: tomcat9
+    state: started
+    enabled: yes
+
+- name: Create schedule_logs directory
+  file:
+    path: '/var/lib/tomcat9/schedule_logs'
     state: directory
     owner: "{{ tomcat_user }}"
     group: "{{ tomcat_group }}"
+    mode: '0777'
+  become: true
 
-
-- name: Extract Tomcat
-  unarchive:
-    src: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
-    dest: "{{ tomcat_install_dir }}"
-    remote_src: yes
-    owner: "{{ tomcat_user }}"
-    group: "{{ tomcat_group }}"
-    creates: "{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"
-
-- name: Create symbolic link for easier access
+- name: Remove the default ROOT directory if it exists
   file:
-    src: "{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"
-    dest: "{{ tomcat_install_dir }}/latest"
-    state: link
+    path: /var/lib/tomcat9/webapps/ROOT
+    state: absent
 
-- name: Change ownership of Tomcat directory
-  file:
-    path: "{{ tomcat_install_dir }}/latest"
-    state: directory
-    owner: "{{ tomcat_user }}"
-    group: "{{ tomcat_group }}"
-    recurse: yes
-
-
-- name: Allow Tomcat to be executed as a service
+- name: Deploy WAR file to Tomcat
   copy:
-    dest: /etc/systemd/system/tomcat.service
-    content: |
-      [Unit]
-      Description=Apache Tomcat Web Application Container
-      After=network.target
+    src: files/ROOT.war
+    dest: /var/lib/tomcat9/webapps/
+    owner: tomcat
+    group: tomcat
 
-      [Service]
-      Type=forking
-
-      User={{ tomcat_user }}
-      Group={{ tomcat_group }}
-      Environment=JAVA_HOME=/usr/lib/jvm/default-java
-      Environment=CATALINA_PID={{ tomcat_install_dir }}/latest/temp/tomcat.pid
-      Environment=CATALINA_HOME={{ tomcat_install_dir }}/latest
-      Environment=CATALINA_BASE={{ tomcat_install_dir }}/latest
-      ExecStart={{ tomcat_install_dir }}/latest/bin/startup.sh
-      ExecStop={{ tomcat_install_dir }}/latest/bin/shutdown.sh
-      Restart=on-failure
-
-      [Install]
-      WantedBy=multi-user.target
+- name: Restart Tomcat service
+  service:
+    name: tomcat9
+    state: restarted
