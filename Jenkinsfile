@@ -61,25 +61,30 @@ pipeline {
                 archiveArtifacts(artifacts: '**/build/libs/*.war', followSymlinks: false)
             }
         }
-        // stage('Build Frontend') {
-        //     steps {
-        //         dir('frontend') {
-        //             echo 'Building frontend...'
-        //             sh 'npm install'
-        //             sh 'npm run build'
-        //         }
-        //     }
-
-        // }
-        // stage('Archive frontend') {
-        //     steps {
-        //         dir('frontend') {
-        //             sh 'tar -czf build.tar.gz build'
-        //             // archiveArtifacts(artifacts: 'frontend/build/**/*', followSymlinks: false)
-        //             archiveArtifacts(artifacts: 'build.tar.gz', followSymlinks: false)
-        //         }
-        //     }
-        // }
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    echo 'Building frontend...'
+                    echo "${env.REACT_APP_API_BASE_URL}"
+                    withEnv([
+                        "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
+                    ])
+                    {
+                        sh 'npm install'
+                        sh 'npm run build'
+                    }
+                }
+            }
+        }
+        stage('Archive frontend') {
+            steps {
+                dir('frontend') {
+                    sh 'tar -czf build.tar.gz build'
+                    // archiveArtifacts(artifacts: 'frontend/build/**/*', followSymlinks: false)
+                    archiveArtifacts(artifacts: 'build.tar.gz', followSymlinks: false)
+                }
+            }
+        }
         // stage('Archive artifact') {
         //     steps {
         //         unstash 'frontend-artifact'
