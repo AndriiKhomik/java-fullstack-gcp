@@ -65,7 +65,6 @@ pipeline {
             steps {
                 dir('frontend') {
                     echo 'Building frontend...'
-                    echo "${env.REACT_APP_API_BASE_URL}"
                     withEnv([
                         "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
                     ])
