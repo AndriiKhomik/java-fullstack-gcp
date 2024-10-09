@@ -9,7 +9,7 @@ variable "region" {
   description = "Region"
   type        = string
   sensitive   = true
-  default     = "us-central1"
+  default     = "europe-north1"
 }
 
 variable "user" {
