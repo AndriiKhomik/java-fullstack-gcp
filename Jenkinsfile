@@ -55,7 +55,9 @@ pipeline {
         }
         stage('Run ansible') {
             steps {
-                sh 'ansible-playbook -i /var/lib/jenkins/workspace/artifacts-test/ansible/inventory.yml /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx-role.yml'
+                dir('ansible') {
+                    sh 'ansible-playbook -i ./inventory.yml .java-app/nginx-role.yml'
+                }
             }
         }
         // stage('Build Backend') {
