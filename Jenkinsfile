@@ -42,8 +42,15 @@ pipeline {
                         terraform init -upgrade
                         terraform apply -auto-approve
                         frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
-                        echo "FRONTEND_VM_IP=${frontend_vm_ip}"
+                        backend_vm_ip=$(terraform output -raw backend_vm_ip)
+                        mongodb_vm_ip=$(terraform output -raw mongodb_vm_ip)
+                        postgres_vm_ip=$(terraform output -raw postgres_vm_ip)
+                        redis_vm_ip=$(terraform output -raw redis_vm_ip)
                         echo "nginx_server=${frontend_vm_ip}" > ../.env
+                        echo "mongo_server=${mongodb_vm_ip}" > ../.env
+                        echo "tomcat_server=${backend_vm_ip}" > ../.env
+                        echo "postgres_server=${postgres_vm_ip}" > ../.env
+                        echo "redis_server=${redis_vm_ip}" > ../.env
                         echo end
                     '''
                 }
