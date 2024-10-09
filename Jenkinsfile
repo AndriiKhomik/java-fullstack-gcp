@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         GITHUB_REPO = 'https://github.com/AndriiKhomik/java-fullstack-gcp.git'
+        GCP_KEY = credentials('gcp-key')
 
         POSTGRES_USER = credentials('postgres_user')
         POSTGRES_PASSWORD = credentials('postgres_password')
@@ -58,7 +59,7 @@ pipeline {
                 dir('ansible') {
                     sh 'pwd'
                     sh 'ls -al'
-                    sh 'ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml'
+                    sh 'ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml --private-key="$GCP_KEY"'
                 }
             }
         }
