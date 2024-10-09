@@ -81,11 +81,11 @@ pipeline {
                 }
             }
         }
-        // stage('Archive backend') {
-        //     steps {
-        //         archiveArtifacts(artifacts: '**/build/libs/*.war', followSymlinks: false)
-        //     }
-        // }
+        stage('Archive backend') {
+            steps {
+                archiveArtifacts(artifacts: '**/build/libs/*.war', followSymlinks: false)
+            }
+        }
         // stage('Build Frontend') {
         //     steps {
         //         dir('frontend') {
