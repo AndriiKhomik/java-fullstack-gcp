@@ -54,15 +54,15 @@ pipeline {
                 sh './change_ips.sh .env ./ansible/inventory.yml '
             }
         }
-        // stage('Run ansible') {
-        //     steps {
-        //         dir('ansible') {
-        //             sh 'pwd'
-        //             sh 'ls -al'
-        //             sh 'ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml --private-key="$GCP_KEY"'
-        //         }
-        //     }
-        // }
+        stage('Run ansible') {
+            steps {
+                dir('ansible') {
+                    sh 'pwd'
+                    sh 'ls -al'
+                    sh 'ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml --private-key="$GCP_KEY"'
+                }
+            }
+        }
         // stage('Build Backend') {
         //     steps {
         //         echo 'Building backend...'
