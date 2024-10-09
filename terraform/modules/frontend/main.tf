@@ -29,7 +29,7 @@ resource "null_resource" "run_ansible" {
   depends_on = []
 
   provisioner "local-exec" {
-    command     = "ansible-playbook -i /var/lib/jenkins/workspace/artifacts-test/ansible/inventory.yml /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginxrole.yml"
+    command     = "ansible-playbook -i /var/lib/jenkins/workspace/artifacts-test/ansible/inventory.yml /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx-role.yml"
     working_dir = path.module
   }
 }
