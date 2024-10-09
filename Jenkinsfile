@@ -27,45 +27,38 @@ pipeline {
                 checkout scm
             }
         }
-        // stage('Create .env file') {
-        //     steps {
-        //         sh '''
-        //             touch .env
-        //             > .env
-        //         '''
-        //     }
-        // }
-        // stage('Provision Infracstructure') {
-        //     steps {
-        //         dir('terraform') {
-        //             sh '''
-        //                 terraform init -upgrade
-        //                 terraform apply -auto-approve
-        //                 frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
-        //                 echo "FRONTEND_VM_IP=${frontend_vm_ip}"
-        //                 echo "nginx_server=${frontend_vm_ip}" > ../.env
-        //                 echo end
-        //             '''
-        //         }
-        //     }
-        // }
-        // stage('Change IPs in ansible config'){
-        //     steps {
-        //         sh './change_ips.sh .env ./ansible/inventory.yml'
-        //     }
-        // }
-        // stage('Add to known host') {
-        //     steps {
-        //         sh './add_to_known_hosts.sh .env'
-        //     }
-        // }
-        // stage('Run ansible') {
-        //     steps {
-        //         dir('ansible') {
-        //             sh 'ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml --private-key="$GCP_KEY"'
-        //         }
-        //     }
-        // }
+        stage('Create .env file') {
+            steps {
+                sh '''
+                    touch .env
+                    > .env
+                '''
+            }
+        }
+        stage('Provision Infracstructure') {
+            steps {
+                dir('terraform') {
+                    sh '''
+                        terraform init -upgrade
+                        terraform apply -auto-approve
+                        frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
+                        echo "FRONTEND_VM_IP=${frontend_vm_ip}"
+                        echo "nginx_server=${frontend_vm_ip}" > ../.env
+                        echo end
+                    '''
+                }
+            }
+        }
+        stage('Change IPs in ansible config'){
+            steps {
+                sh './change_ips.sh .env ./ansible/inventory.yml'
+            }
+        }
+        stage('Add to known host') {
+            steps {
+                sh './add_to_known_hosts.sh .env'
+            }
+        }
         stage('Build Backend') {
             steps {
                 echo 'Building backend...'
@@ -109,43 +102,16 @@ pipeline {
         //         }
         //     }
         // }
-        // stage('Archive artifact') {
-        //     steps {
-        //         unstash 'frontend-artifact'
-        //         archiveArtifacts(artifacts: build, followSymlinks: false)
-        //     }
-        // }
-        // stage('Save Artifacts Locally') {
-        //     steps {
-        //         unstash 'backend-artifact'
-        //         unstash 'frontend-artifact'
-
-        //         sh '''
-        //             mkdir -p ~/jenkins_artifacts/backend
-        //             mkdir -p ~/jenkins_artifacts/frontend
-
-        //             cp build/libs/*.war ~/jenkins_artifacts/backend
-        //             cp -r frontend/build/* ~/jenkins_artifacts/frontend
-        //         '''
-        //     }
-        // }
-        // stage('Deploy artifacts') {
-        //     steps {
-        //         script {
-        // use rsync for this purpose !!!!!!!!
-        //             unstash 'frontend-artifact'
-        //             withCredentials([sshUserPrivateKey(credentialsId: 'jenkins', keyFileVariable: 'SSH_KEY')]) {
-        //                 sh '''
-        //                     scp -i ${SSH_KEY} -r build/* ${USER_NAME}@${env.FRONTEND_VM_IP}:/var/www/html/
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Run ansible') {
+            steps {
+                dir('ansible') {
+                    sh '''
+                        ansible-playbook -i ./inventory.yml ./java-app/redis-role.yml --private-key="$GCP_KEY"
+                        ansible-playbook -i ./inventory.yml ./java-app/postgres-role.yml --private-key="$GCP_KEY"
+                        ansible-playbook -i ./inventory.yml ./java-app/mongodb-role.yml --private-key="$GCP_KEY"
+                    '''
+                }
+            }
+        }
     }
-    // post {
-    //     always {
-    //         cleanWs()
-    //     }
-    // }
 }

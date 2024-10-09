@@ -8,6 +8,22 @@
     name: redis-server
     state: present
 
+- name: Update redis configuration
+  ansible.builtin.lineinfile:
+    path: /etc/redis/redis.conf
+    regexp: '^protected-mode'
+    line: 'protected-mode no'
+    state: present
+    backup: yes
+
+- name: Bind default address
+  ansible.builtin.lineinfile:
+    path: /etc/redis/redis.conf
+    regexp: '^bind'
+    line: 'bind 0.0.0.0 ::1'
+    state: present
+    backup: yes
+
 - name: Start redis
   service:
     name: redis-server
