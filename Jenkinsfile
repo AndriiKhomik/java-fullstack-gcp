@@ -38,7 +38,7 @@ pipeline {
             steps {
                 dir('terraform') {
                     sh '''
-                        terraform init
+                        terraform init -upgrade
                         terraform apply -auto-approve
                         frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
                         echo "FRONTEND_VM_IP=${frontend_vm_ip}"
@@ -50,7 +50,7 @@ pipeline {
         }
         stage('Change IPs in ansible config'){
             steps {
-                sh './change_ips.sh .env.test ./ansible/inventory.yml '
+                sh './change_ips.sh .env ./ansible/inventory.yml '
             }
         }
         // stage('Build Backend') {
