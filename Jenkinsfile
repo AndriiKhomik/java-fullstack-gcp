@@ -27,60 +27,60 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Create .env file') {
-            steps {
-                sh '''
-                    touch .env
-                    > .env
-                '''
-            }
-        }
-        stage('Provision Infracstructure') {
-            steps {
-                dir('terraform') {
-                    sh '''
-                        terraform init -upgrade
-                        terraform apply -auto-approve
-                        frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
-                        echo "FRONTEND_VM_IP=${frontend_vm_ip}"
-                        echo "nginx_server=${frontend_vm_ip}" > ../.env
-                        echo end
-                    '''
-                }
-            }
-        }
-        stage('Change IPs in ansible config'){
-            steps {
-                sh './change_ips.sh .env ./ansible/inventory.yml'
-            }
-        }
-        stage('Add to known host') {
-            steps {
-                sh './add_to_known_hosts.sh .env'
-            }
-        }
-        stage('Run ansible') {
-            steps {
-                dir('ansible') {
-                    sh 'ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml --private-key="$GCP_KEY"'
-                }
-            }
-        }
-        // stage('Build Backend') {
+        // stage('Create .env file') {
         //     steps {
-        //         echo 'Building backend...'
-        //         withEnv([
-        //             "POSTGRES_USER=${env.POSTGRES_USER}",
-        //             "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}",
-        //             "POSTGRES_DB=${env.POSTGRES_DB}",
-        //             "MONGO_INITDB_ROOT_USERNAME=${env.MONGO_INITDB_ROOT_USERNAME}",
-        //             "MONGO_INITDB_ROOT_PASSWORD=${env.MONGO_INITDB_ROOT_PASSWORD}",
-        //             "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
-        //         ]) {
-        //             sh 'gradle clean build -x test'
+        //         sh '''
+        //             touch .env
+        //             > .env
+        //         '''
+        //     }
+        // }
+        // stage('Provision Infracstructure') {
+        //     steps {
+        //         dir('terraform') {
+        //             sh '''
+        //                 terraform init -upgrade
+        //                 terraform apply -auto-approve
+        //                 frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
+        //                 echo "FRONTEND_VM_IP=${frontend_vm_ip}"
+        //                 echo "nginx_server=${frontend_vm_ip}" > ../.env
+        //                 echo end
+        //             '''
         //         }
         //     }
         // }
+        // stage('Change IPs in ansible config'){
+        //     steps {
+        //         sh './change_ips.sh .env ./ansible/inventory.yml'
+        //     }
+        // }
+        // stage('Add to known host') {
+        //     steps {
+        //         sh './add_to_known_hosts.sh .env'
+        //     }
+        // }
+        // stage('Run ansible') {
+        //     steps {
+        //         dir('ansible') {
+        //             sh 'ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml --private-key="$GCP_KEY"'
+        //         }
+        //     }
+        // }
+        stage('Build Backend') {
+            steps {
+                echo 'Building backend...'
+                withEnv([
+                    "POSTGRES_USER=${env.POSTGRES_USER}",
+                    "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}",
+                    "POSTGRES_DB=${env.POSTGRES_DB}",
+                    "MONGO_INITDB_ROOT_USERNAME=${env.MONGO_INITDB_ROOT_USERNAME}",
+                    "MONGO_INITDB_ROOT_PASSWORD=${env.MONGO_INITDB_ROOT_PASSWORD}",
+                    "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
+                ]) {
+                    sh 'gradle clean build -x test'
+                }
+            }
+        }
         // stage('Archive backend') {
         //     steps {
         //         archiveArtifacts(artifacts: '**/build/libs/*.war', followSymlinks: false)
