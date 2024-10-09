@@ -1,6 +1,6 @@
-# output "frontend_vm_ip" {
-#   value = module.frontend.frontend_vm_ip
-# }
+output "frontend_vm_ip" {
+  value = module.frontend.frontend_vm_ip
+}
 
 output "backend_vm_ip" {
   value = module.backend.backend_vm_ip
