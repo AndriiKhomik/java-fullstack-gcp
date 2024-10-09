@@ -26,64 +26,64 @@ pipeline {
                 checkout scm
             }
         }
-        // stage('Provision Infracstructure') {
+        stage('Provision Infracstructure') {
+            steps {
+                dir('terraform') {
+                    sh '''
+                        terraform init
+                        terraform apply -auto-approve
+                        # terraform apply -auto-approve -var "public_key_file=id_rsa.pub"
+                        frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
+                        user_name=$(terraform output -raw user_name)
+                        echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> env.properties
+                        echo "USER_NAME=${user_name}" >> env.properties
+                    '''
+                }
+            }
+        }
+        // stage('Build Backend') {
         //     steps {
-        //         dir('terraform') {
-        //             sh '''
-        //                 terraform init
-        //                 terraform apply -auto-approve
-        //                 # terraform apply -auto-approve -var "public_key_file=id_rsa.pub"
-        //                 frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
-        //                 user_name=$(terraform output -raw user_name)
-        //                 echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> env.properties
-        //                 echo "USER_NAME=${user_name}" >> env.properties
-        //             '''
+        //         echo 'Building backend...'
+        //         withEnv([
+        //             "POSTGRES_USER=${env.POSTGRES_USER}",
+        //             "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}",
+        //             "POSTGRES_DB=${env.POSTGRES_DB}",
+        //             "MONGO_INITDB_ROOT_USERNAME=${env.MONGO_INITDB_ROOT_USERNAME}",
+        //             "MONGO_INITDB_ROOT_PASSWORD=${env.MONGO_INITDB_ROOT_PASSWORD}",
+        //             "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
+        //         ]) {
+        //             sh 'gradle clean build -x test'
         //         }
         //     }
         // }
-        stage('Build Backend') {
-            steps {
-                echo 'Building backend...'
-                withEnv([
-                    "POSTGRES_USER=${env.POSTGRES_USER}",
-                    "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}",
-                    "POSTGRES_DB=${env.POSTGRES_DB}",
-                    "MONGO_INITDB_ROOT_USERNAME=${env.MONGO_INITDB_ROOT_USERNAME}",
-                    "MONGO_INITDB_ROOT_PASSWORD=${env.MONGO_INITDB_ROOT_PASSWORD}",
-                    "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
-                ]) {
-                    sh 'gradle clean build -x test'
-                }
-            }
-        }
-        stage('Archive backend') {
-            steps {
-                archiveArtifacts(artifacts: '**/build/libs/*.war', followSymlinks: false)
-            }
-        }
-        stage('Build Frontend') {
-            steps {
-                dir('frontend') {
-                    echo 'Building frontend...'
-                    withEnv([
-                        "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
-                    ])
-                    {
-                        sh 'npm install'
-                        sh 'npm run build'
-                    }
-                }
-            }
-        }
-        stage('Archive frontend') {
-            steps {
-                dir('frontend') {
-                    sh 'tar -czf build.tar.gz build'
-                    // archiveArtifacts(artifacts: 'frontend/build/**/*', followSymlinks: false)
-                    archiveArtifacts(artifacts: 'build.tar.gz', followSymlinks: false)
-                }
-            }
-        }
+        // stage('Archive backend') {
+        //     steps {
+        //         archiveArtifacts(artifacts: '**/build/libs/*.war', followSymlinks: false)
+        //     }
+        // }
+        // stage('Build Frontend') {
+        //     steps {
+        //         dir('frontend') {
+        //             echo 'Building frontend...'
+        //             withEnv([
+        //                 "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
+        //             ])
+        //             {
+        //                 sh 'npm install'
+        //                 sh 'npm run build'
+        //             }
+        //         }
+        //     }
+        // }
+        // stage('Archive frontend') {
+        //     steps {
+        //         dir('frontend') {
+        //             sh 'tar -czf build.tar.gz build'
+        //             // archiveArtifacts(artifacts: 'frontend/build/**/*', followSymlinks: false)
+        //             archiveArtifacts(artifacts: 'build.tar.gz', followSymlinks: false)
+        //         }
+        //     }
+        // }
         // stage('Archive artifact') {
         //     steps {
         //         unstash 'frontend-artifact'
