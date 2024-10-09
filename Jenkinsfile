@@ -56,7 +56,9 @@ pipeline {
         stage('Run ansible') {
             steps {
                 dir('ansible') {
-                    sh 'ansible-playbook -i ./inventory.yml .java-app/nginx-role.yml'
+                    sh 'pwd'
+                    sh 'ls -al'
+                    // sh 'ansible-playbook -i ./inventory.yml .java-app/nginx-role.yml'
                 }
             }
         }
