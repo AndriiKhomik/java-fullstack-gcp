@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         GITHUB_REPO = 'https://github.com/AndriiKhomik/java-fullstack-gcp.git'
-        // GCP_CREDS = credentials('gcp-credentials.json') 
 
         POSTGRES_USER = credentials('postgres_user')
         POSTGRES_PASSWORD = credentials('postgres_password')
@@ -16,8 +15,9 @@ pipeline {
     tools {
         nodejs 'NodeJS 14.x'
         gradle 'Gradle 7.5'
-        maven 'Maven'
-        jdk 'Java 11'
+        // TODO: Test and remove
+        // maven 'Maven'
+        // jdk 'Java 11'
     }
 
     stages {
@@ -26,21 +26,29 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Provision Infracstructure') {
-            steps {
-                dir('terraform') {
-                    sh '''
-                        terraform init
-                        terraform apply -auto-approve
-                        # terraform apply -auto-approve -var "public_key_file=id_rsa.pub"
-                        frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
-                        user_name=$(terraform output -raw user_name)
-                        echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> env.properties
-                        echo "USER_NAME=${user_name}" >> env.properties
-                    '''
-                }
-            }
+        stage('Create .env file') {
+            sh '''
+                touch .env
+                pwd
+                echo FRONTEND_VM_IP=test
+                cat .env
+            '''
         }
+        // stage('Provision Infracstructure') {
+        //     steps {
+        //         dir('terraform') {
+        //             sh '''
+        //                 terraform init
+        //                 terraform apply -auto-approve
+        //                 # terraform apply -auto-approve -var "public_key_file=id_rsa.pub"
+        //                 frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
+        //                 user_name=$(terraform output -raw user_name)
+        //                 echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> env.properties
+        //                 echo "USER_NAME=${user_name}" >> env.properties
+        //             '''
+        //         }
+        //     }
+        // }
         // stage('Build Backend') {
         //     steps {
         //         echo 'Building backend...'
