@@ -20,14 +20,14 @@ module "firewall" {
   vpc_name = google_compute_network.terraform_network.name
 }
 
-# module "frontend" {
-#   source                    = "./modules/frontend"
-#   google_compute_network    = google_compute_network.terraform_network.self_link
-#   google_compute_subnetwork = google_compute_subnetwork.terraform_subnetwork.self_link
-#   # google_compute_address    = google_compute_address.static_ip.address
-#   region       = var.region
-#   machine_type = var.machine_type
-# }
+module "frontend" {
+  source                    = "./modules/frontend"
+  google_compute_network    = google_compute_network.terraform_network.self_link
+  google_compute_subnetwork = google_compute_subnetwork.terraform_subnetwork.self_link
+  # google_compute_address    = google_compute_address.static_ip.address
+  region       = var.region
+  machine_type = var.machine_type
+}
 
 module "backend" {
   source                    = "./modules/backend"
