@@ -1,5 +1,5 @@
 resource "google_compute_instance" "backend" {
-  name                      = "backend"
+  name                      = "tomcat"
   machine_type              = var.machine_type
   zone                      = "${var.region}-b"
   allow_stopping_for_update = true

@@ -30,8 +30,7 @@ pipeline {
             steps {
                 sh '''
                     touch .env
-                    pwd
-                    cat .env
+                    > .env
                 '''
             }
         }
@@ -43,9 +42,15 @@ pipeline {
                         terraform apply -auto-approve
                         frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
                         echo "FRONTEND_VM_IP=${frontend_vm_ip}"
-                        echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> ../.env
+                        echo "nginx_server=${frontend_vm_ip}" > ../.env
+                        echo end
                     '''
                 }
+            }
+        }
+        stage('Change IPs in ansible config'){
+            steps {
+                sh './change_ips.sh .env.test ./ansible/inventory.yml '
             }
         }
         // stage('Build Backend') {

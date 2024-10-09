@@ -1,5 +1,5 @@
 resource "google_compute_instance" "webserver" {
-  name                      = "frontend-instance"
+  name                      = "nginx"
   machine_type              = var.machine_type
   zone                      = "${var.region}-b"
   allow_stopping_for_update = true
