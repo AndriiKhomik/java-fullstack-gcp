@@ -58,7 +58,7 @@ pipeline {
                 dir('ansible') {
                     sh 'pwd'
                     sh 'ls -al'
-                    // sh 'ansible-playbook -i ./inventory.yml .java-app/nginx-role.yml'
+                    sh 'ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml'
                 }
             }
         }
