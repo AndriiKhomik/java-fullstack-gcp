@@ -42,6 +42,7 @@ pipeline {
                         terraform init
                         terraform apply -auto-approve
                         frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
+                        echo "FRONTEND_VM_IP=${frontend_vm_ip}"
                         echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> ../.env
                     '''
                 }
