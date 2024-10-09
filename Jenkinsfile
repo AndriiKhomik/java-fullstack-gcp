@@ -51,14 +51,17 @@ pipeline {
         }
         stage('Change IPs in ansible config'){
             steps {
-                sh './change_ips.sh .env ./ansible/inventory.yml '
+                sh './change_ips.sh .env ./ansible/inventory.yml'
+            }
+        }
+        stage('Add to known host') {
+            steps {
+                sh './add_to_known_hosts.sh .env'
             }
         }
         stage('Run ansible') {
             steps {
                 dir('ansible') {
-                    sh 'pwd'
-                    sh 'ls -al'
                     sh 'ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml --private-key="$GCP_KEY"'
                 }
             }

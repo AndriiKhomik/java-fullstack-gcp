@@ -11,7 +11,7 @@ mongoservers:
     mongo_server: 
       ansible_host: 35.247.123.100
       ansible_user: andrii_khomik
-      ansible_ssh_private_key: ~/.ssh/my-gcp-key
+      ansible_ssh_private_key: ~/.ssh/id_rsa
       ansible_connection: ssh      
 
 tomcatservers:
@@ -19,7 +19,7 @@ tomcatservers:
     tomcat_server:
       ansible_host: 34.127.32.100
       ansible_user: andrii_khomik
-      ansible_ssh_private_key: ~/.ssh/my-gcp-key
+      ansible_ssh_private_key: ~/.ssh/id_rsa
       ansible_connection: ssh 
 
 redisservers:
@@ -27,7 +27,7 @@ redisservers:
     redis_server:
       ansible_host: 35.247.123.100
       ansible_user: andrii_khomik
-      ansible_ssh_private_key: ~/.ssh/my-gcp-key
+      ansible_ssh_private_key: ~/.ssh/id_rsa
       ansible_connection: ssh 
 
 postgresservers:
@@ -35,5 +35,5 @@ postgresservers:
     postgres_server:
       ansible_host: 35.240.19.100
       ansible_user: andrii_khomik
-      ansible_ssh_private_key: ~/.ssh/my-gcp-key
+      ansible_ssh_private_key: ~/.ssh/id_rsa
       ansible_connection: ssh 
