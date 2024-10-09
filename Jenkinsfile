@@ -31,26 +31,23 @@ pipeline {
                 sh '''
                     touch .env
                     pwd
-                    echo FRONTEND_VM_IP=test >> .env
+                    echo FRONTEND_VM_IP= >> .env
                     cat .env
                 '''
             }
         }
-        // stage('Provision Infracstructure') {
-        //     steps {
-        //         dir('terraform') {
-        //             sh '''
-        //                 terraform init
-        //                 terraform apply -auto-approve
-        //                 # terraform apply -auto-approve -var "public_key_file=id_rsa.pub"
-        //                 frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
-        //                 user_name=$(terraform output -raw user_name)
-        //                 echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> env.properties
-        //                 echo "USER_NAME=${user_name}" >> env.properties
-        //             '''
-        //         }
-        //     }
-        // }
+        stage('Provision Infracstructure') {
+            steps {
+                dir('terraform') {
+                    sh '''
+                        terraform init
+                        terraform apply -auto-approve
+                        frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
+                        echo "FRONTEND_VM_IP=${frontend_vm_ip}" >> .env
+                    '''
+                }
+            }
+        }
         // stage('Build Backend') {
         //     steps {
         //         echo 'Building backend...'
