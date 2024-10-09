@@ -21,18 +21,15 @@ resource "google_compute_instance" "webserver" {
     subnetwork = var.google_compute_subnetwork
 
     access_config {
-      # nat_ip = var.google_compute_address
     }
   }
-
-  # metadata_startup_script = file("frontend.sh")
 }
 
-# resource "null_resource" "run_ansible" {
-#   depends_on = [  ]
+resource "null_resource" "run_ansible" {
+  depends_on = []
 
-#   provisioner "local-exec" {
-#     command = "ansible-playbook -i ~/Desktop/java-fullstack-gcp/ansible/inventory.yml ~/Desktop/java-fullstack-gcp/ansible/java-app/nginxrole.yml"
-#     working_dir = path.module
-#   }
-# }
+  provisioner "local-exec" {
+    command     = "ansible-playbook -i /var/lib/jenkins/workspace/artifacts-test/ansible/inventory.yml /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginxrole.yml"
+    working_dir = path.module
+  }
+}
