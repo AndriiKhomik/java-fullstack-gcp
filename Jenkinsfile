@@ -31,7 +31,7 @@ pipeline {
                 sh '''
                     touch .env
                     pwd
-                    echo FRONTEND_VM_IP=test
+                    echo FRONTEND_VM_IP=test >> .env
                     cat .env
                 '''
             }
