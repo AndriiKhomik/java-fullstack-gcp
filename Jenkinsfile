@@ -27,12 +27,14 @@ pipeline {
             }
         }
         stage('Create .env file') {
-            sh '''
-                touch .env
-                pwd
-                echo FRONTEND_VM_IP=test
-                cat .env
-            '''
+            steps {
+                sh '''
+                    touch .env
+                    pwd
+                    echo FRONTEND_VM_IP=test
+                    cat .env
+                '''
+            }
         }
         // stage('Provision Infracstructure') {
         //     steps {
