@@ -25,11 +25,12 @@ resource "google_compute_instance" "webserver" {
   }
 }
 
-resource "null_resource" "run_ansible" {
-  depends_on = []
+# resource "null_resource" "run_ansible" {
+#   depends_on = [google_compute_instance.webserver]
 
-  provisioner "local-exec" {
-    command     = "ansible-playbook -i /var/lib/jenkins/workspace/artifacts-test/ansible/inventory.yml /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx-role.yml"
-    working_dir = path.module
-  }
-}
+#   provisioner "local-exec" {
+#     # command     = "ansible-playbook -i /var/lib/jenkins/workspace/artifacts-test/ansible/inventory.yml /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx-role.yml"
+#     command     = "ansible-playbook -i ~/Desktop/java-fullstack-gcp/ansible/inventory.yml ~/Desktop/java-fullstack-gcp/ansible/java-app/nginx-role.yml"
+#     working_dir = path.module
+#   }
+# }

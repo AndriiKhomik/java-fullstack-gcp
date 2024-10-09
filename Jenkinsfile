@@ -53,6 +53,11 @@ pipeline {
                 sh './change_ips.sh .env ./ansible/inventory.yml '
             }
         }
+        stage('Run ansible') {
+            steps {
+                sh 'ansible-playbook -i /var/lib/jenkins/workspace/artifacts-test/ansible/inventory.yml /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx-role.yml'
+            }
+        }
         // stage('Build Backend') {
         //     steps {
         //         echo 'Building backend...'
