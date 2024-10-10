@@ -37,7 +37,6 @@ pipeline {
                     sh '''
                         terraform init -upgrade
                         terraform apply -auto-approve
-                        user_name=$(terraform output -raw user_name)
                         frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
                         backend_vm_ip=$(terraform output -raw backend_vm_ip)
                         mongodb_vm_ip=$(terraform output -raw mongodb_vm_ip)
@@ -49,7 +48,6 @@ pipeline {
                         echo "postgres_server=${postgres_vm_ip}" >> ../.env
                         echo "redis_server=${redis_vm_ip}" >> ../.env
                         echo "REACT_APP_API_BASE_URL=${backend_vm_ip}"
-                        REACT_APP_API_BASE_URL=${backend_vm_ip}
                     '''
                 }
             }
@@ -86,13 +84,12 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    withEnv([
-                        "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
-                    ]) {
-                        echo 'Building frontend...'
+                    echo 'Building frontend...'
+                    sh '''
+                        export $(grep -v '^#' ../.env | xargs)
                         sh 'npm install'
                         sh 'npm run build'
-                    }
+                    '''
                 }
             }
         }
@@ -119,7 +116,7 @@ pipeline {
                     sh '''
                         ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml --private-key="$GCP_KEY"
                         ansible-playbook -i ./inventory.yml ./java-app/redis-role.yml --private-key="$GCP_KEY"
-                        # ansible-playbook -i ./inventory.yml ./java-app/postgres-role.yml --private-key="$GCP_KEY"
+                        ansible-playbook -i ./inventory.yml ./java-app/postgres-role.yml --private-key="$GCP_KEY"
                         ansible-playbook -i ./inventory.yml ./java-app/mongodb-role.yml --private-key="$GCP_KEY"
                     '''
                 }

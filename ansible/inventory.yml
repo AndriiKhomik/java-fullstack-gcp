@@ -4,23 +4,23 @@ webservers:
       ansible_host: 34.168.36.200
       ansible_user: andrii_khomik
       ansible_ssh_private_key: ~/.ssh/id_rsa
-      ansible_connection: ssh    
+      ansible_connection: ssh
 
 mongoservers:
   hosts:
-    mongo_server: 
+    mongo_server:
       ansible_host: 35.247.123.100
       ansible_user: andrii_khomik
       ansible_ssh_private_key: ~/.ssh/id_rsa
-      ansible_connection: ssh      
+      ansible_connection: ssh
 
 tomcatservers:
   hosts:
     tomcat_server:
-      ansible_host: 104.154.82.242
+      ansible_host: 35.228.149.255
       ansible_user: andrii_khomik
       ansible_ssh_private_key: ~/.ssh/id_rsa
-      ansible_connection: ssh 
+      ansible_connection: ssh
 
 redisservers:
   hosts:
@@ -28,12 +28,12 @@ redisservers:
       ansible_host: 35.188.205.162
       ansible_user: andrii_khomik
       ansible_ssh_private_key: ~/.ssh/id_rsa
-      ansible_connection: ssh 
+      ansible_connection: ssh
 
 postgresservers:
   hosts:
     postgres_server:
-      ansible_host: 34.27.150.81
+      ansible_host: 35.228.149.255
       ansible_user: andrii_khomik
       ansible_ssh_private_key: ~/.ssh/id_rsa
-      ansible_connection: ssh 
+      ansible_connection: ssh
