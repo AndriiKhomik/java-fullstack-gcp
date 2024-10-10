@@ -87,7 +87,7 @@ pipeline {
             steps {
                 dir('frontend') {
                     withEnv([
-                        "REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}"
+                        "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
                     ]) {
                         echo 'Building frontend...'
                         sh 'npm install'
