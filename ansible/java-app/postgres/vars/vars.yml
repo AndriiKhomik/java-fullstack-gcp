@@ -30,3 +30,7 @@ postgresql_service_state: "started"
 postgresql_service_enabled: true
 postgresql_bin_path: "/usr/lib/postgresql/14/bin"
 postgresql_config_path: "/etc/postgresql/14/main"
+postgres_host: "localhost"
+db_backup_filename: "data.dump"
+postgres_port: 5432
+postgres_db: "postgres"

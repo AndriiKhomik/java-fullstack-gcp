@@ -99,7 +99,7 @@
 
 - name: Set permissions on PostgreSQL data directory
   ansible.builtin.file:
-    path: "{{ postgresql_data_dir1 }}"
+    path: "{{ __postgresql_data_dir }}"
     owner: "{{ postgresql_user }}"
     group: "{{ postgresql_user }}"
     mode: "0700"
@@ -109,15 +109,17 @@
   postgresql_user:
     name: postgres
     password: "{{ postgresql_password }}"
+    login_user: postgres
+    login_password: "{{ postgresql_password }}"
     state: present
-  become: true
-  become_user: "{{ postgresql_user }}"
+  # become: true
+  # become_user: "{{ postgresql_user }}"
 
 - name: Ensure PostgreSQL databases are present.
   postgresql_db:
     name: "{{ item.name }}"
-    lc_collate: "{{ item.lc_collate | default('en_US.UTF-8') }}"
-    lc_ctype: "{{ item.lc_ctype | default('en_US.UTF-8') }}"
+    # lc_collate: "{{ item.lc_collate | default('en_US.UTF-8') }}"
+    # lc_ctype: "{{ item.lc_ctype | default('en_US.UTF-8') }}"
     encoding: "{{ item.encoding | default('UTF-8') }}"
     template: "{{ item.template | default('template0') }}"
     login_host: "{{ item.login_host | default('localhost') }}"
@@ -185,7 +187,7 @@
   ansible.builtin.shell: |
     psql --set ON_ERROR_STOP=off -U {{ postgresql_user }} -h {{ postgres_host }} -p {{ postgres_port }} -d {{ postgres_db }} -1 -f /home/andrii_khomik/{{ db_backup_filename }}
   environment:
-    PGPASSWORD: "{{ postgres_password }}"
+    PGPASSWORD: "{{ postgresql_password }}"
   args:
     executable: /bin/bash
   notify: restart postgresql
