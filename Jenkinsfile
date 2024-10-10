@@ -87,8 +87,8 @@ pipeline {
                     echo 'Building frontend...'
                     sh '''
                         export $(grep -v '^#' ../.env | xargs)
-                        sh 'npm install'
-                        sh 'npm run build'
+                        npm install
+                        npm run build
                     '''
                 }
             }
