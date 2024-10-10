@@ -50,11 +50,6 @@ pipeline {
                         echo "redis_server=${redis_vm_ip}" >> ../.env
                         echo "REACT_APP_API_BASE_URL=${backend_vm_ip}"
                         REACT_APP_API_BASE_URL=${backend_vm_ip}
-                        ssh-copy-id -i /home/andrii_khomik/.ssh/id_rsa.pub -o StrictHostKeyChecking=no ${user_name}@${frontend_vm_ip}
-                        ssh-copy-id -i /home/andrii_khomik/.sshid_rsa.pub -o StrictHostKeyChecking=no ${user_name}@${backend_vm_ip}
-                        ssh-copy-id -i /home/andrii_khomik/.ssh/id_rsa.pub -o StrictHostKeyChecking=no ${user_name}@${mongodb_vm_ip}
-                        ssh-copy-id -i /home/andrii_khomik/.ssh/id_rsa.pub -o StrictHostKeyChecking=no ${user_name}@${postgres_vm_ip}
-                        ssh-copy-id -i /home/andrii_khomik/.ssh/id_rsa.pub -o StrictHostKeyChecking=no ${user_name}@${redis_vm_ip}
                     '''
                 }
             }

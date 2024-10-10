@@ -8,7 +8,7 @@ resource "google_compute_instance" "postgres" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11"
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
     }
   }
 
