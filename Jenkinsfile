@@ -41,13 +41,13 @@ pipeline {
                         backend_vm_ip=$(terraform output -raw backend_vm_ip)
                         mongodb_vm_ip=$(terraform output -raw mongodb_vm_ip)
                         postgres_vm_ip=$(terraform output -raw postgres_vm_ip)
-                        export redis_vm_ip=$(terraform output -raw redis_vm_ip)
+                        redis_vm_ip=$(terraform output -raw redis_vm_ip)
                         echo "nginx_server=${frontend_vm_ip}" >> ../.env
                         echo "mongo_server=${mongodb_vm_ip}" >> ../.env
                         echo "tomcat_server=${backend_vm_ip}" >> ../.env
                         echo "postgres_server=${postgres_vm_ip}" >> ../.env
                         echo "redis_server=${redis_vm_ip}" >> ../.env
-                        echo "REACT_APP_API_BASE_URL=http://${backend_vm_ip}:8080" >> ../.env
+                        echo "REACT_APP_API_BASE_URL=http://$backend_vm_ip:8080" >> ../.env
                     '''
                 }
             }
