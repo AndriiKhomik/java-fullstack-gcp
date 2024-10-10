@@ -37,17 +37,24 @@ pipeline {
                     sh '''
                         terraform init -upgrade
                         terraform apply -auto-approve
+                        user_name=$(terraform output -raw user_name)
                         frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
                         backend_vm_ip=$(terraform output -raw backend_vm_ip)
                         mongodb_vm_ip=$(terraform output -raw mongodb_vm_ip)
                         postgres_vm_ip=$(terraform output -raw postgres_vm_ip)
-                        redis_vm_ip=$(terraform output -raw redis_vm_ip)
+                        export redis_vm_ip=$(terraform output -raw redis_vm_ip)
                         echo "nginx_server=${frontend_vm_ip}" >> ../.env
                         echo "mongo_server=${mongodb_vm_ip}" >> ../.env
                         echo "tomcat_server=${backend_vm_ip}" >> ../.env
                         echo "postgres_server=${postgres_vm_ip}" >> ../.env
                         echo "redis_server=${redis_vm_ip}" >> ../.env
                         echo "REACT_APP_API_BASE_URL=${backend_vm_ip}"
+                        REACT_APP_API_BASE_URL=${backend_vm_ip}
+                        ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no ${user_name}@${frontend_vm_ip}
+                        ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no ${user_name}@${backend_vm_ip}
+                        ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no ${user_name}@${mongodb_vm_ip}
+                        ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no ${user_name}@${postgres_vm_ip}
+                        ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no ${user_name}@${redis_vm_ip}
                     '''
                 }
             }
@@ -84,9 +91,13 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    echo 'Building frontend...'
+                    withEnv([
+                        "REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}"
+                    ]) {
+                        echo 'Building frontend...'
                         sh 'npm install'
                         sh 'npm run build'
+                    }
                 }
             }
         }
@@ -113,7 +124,7 @@ pipeline {
                     sh '''
                         ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml --private-key="$GCP_KEY"
                         ansible-playbook -i ./inventory.yml ./java-app/redis-role.yml --private-key="$GCP_KEY"
-                        ansible-playbook -i ./inventory.yml ./java-app/postgres-role.yml --private-key="$GCP_KEY"
+                        # ansible-playbook -i ./inventory.yml ./java-app/postgres-role.yml --private-key="$GCP_KEY"
                         ansible-playbook -i ./inventory.yml ./java-app/mongodb-role.yml --private-key="$GCP_KEY"
                     '''
                 }
