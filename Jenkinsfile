@@ -27,45 +27,45 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Create .env file') {
-            steps {
-                sh '''
-                    touch .env
-                    > .env
-                '''
-            }
-        }
-        stage('Provision Infracstructure') {
-            steps {
-                dir('terraform') {
-                    sh '''
-                        terraform init -upgrade
-                        terraform apply -auto-approve
-                        frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
-                        backend_vm_ip=$(terraform output -raw backend_vm_ip)
-                        mongodb_vm_ip=$(terraform output -raw mongodb_vm_ip)
-                        postgres_vm_ip=$(terraform output -raw postgres_vm_ip)
-                        redis_vm_ip=$(terraform output -raw redis_vm_ip)
-                        echo "nginx_server=${frontend_vm_ip}" >> ../.env
-                        echo "mongo_server=${mongodb_vm_ip}" >> ../.env
-                        echo "tomcat_server=${backend_vm_ip}" >> ../.env
-                        echo "postgres_server=${postgres_vm_ip}" >> ../.env
-                        echo "redis_server=${redis_vm_ip}" >> ../.env
-                        echo end
-                    '''
-                }
-            }
-        }
-        stage('Change IPs in ansible config'){
-            steps {
-                sh './change_ips.sh .env ./ansible/inventory.yml'
-            }
-        }
-        stage('Add to known host') {
-            steps {
-                sh './add_to_known_hosts.sh .env'
-            }
-        }
+        // stage('Create .env file') {
+        //     steps {
+        //         sh '''
+        //             touch .env
+        //             > .env
+        //         '''
+        //     }
+        // }
+        // stage('Provision Infracstructure') {
+        //     steps {
+        //         dir('terraform') {
+        //             sh '''
+        //                 terraform init -upgrade
+        //                 terraform apply -auto-approve
+        //                 frontend_vm_ip=$(terraform output -raw frontend_vm_ip)
+        //                 backend_vm_ip=$(terraform output -raw backend_vm_ip)
+        //                 mongodb_vm_ip=$(terraform output -raw mongodb_vm_ip)
+        //                 postgres_vm_ip=$(terraform output -raw postgres_vm_ip)
+        //                 redis_vm_ip=$(terraform output -raw redis_vm_ip)
+        //                 echo "nginx_server=${frontend_vm_ip}" >> ../.env
+        //                 echo "mongo_server=${mongodb_vm_ip}" >> ../.env
+        //                 echo "tomcat_server=${backend_vm_ip}" >> ../.env
+        //                 echo "postgres_server=${postgres_vm_ip}" >> ../.env
+        //                 echo "redis_server=${redis_vm_ip}" >> ../.env
+        //                 echo end
+        //             '''
+        //         }
+        //     }
+        // }
+        // stage('Change IPs in ansible config'){
+        //     steps {
+        //         sh './change_ips.sh .env ./ansible/inventory.yml'
+        //     }
+        // }
+        // stage('Add to known host') {
+        //     steps {
+        //         sh './add_to_known_hosts.sh .env'
+        //     }
+        // }
         stage('Build Backend') {
             steps {
                 echo 'Building backend...'
@@ -86,39 +86,39 @@ pipeline {
                 archiveArtifacts(artifacts: '**/build/libs/*.war', followSymlinks: false)
             }
         }
-        // stage('Build Frontend') {
-        //     steps {
-        //         dir('frontend') {
-        //             echo 'Building frontend...'
-        //             withEnv([
-        //                 "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
-        //             ])
-        //             {
-        //                 sh 'npm install'
-        //                 sh 'npm run build'
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('Archive frontend') {
-        //     steps {
-        //         dir('frontend') {
-        //             sh 'tar -czf build.tar.gz build'
-        //             // archiveArtifacts(artifacts: 'frontend/build/**/*', followSymlinks: false)
-        //             archiveArtifacts(artifacts: 'build.tar.gz', followSymlinks: false)
-        //         }
-        //     }
-        // }
-        stage('Run ansible') {
+        stage('Build Frontend') {
             steps {
-                dir('ansible') {
-                    sh '''
-                        ansible-playbook -i ./inventory.yml ./java-app/redis-role.yml --private-key="$GCP_KEY"
-                        ansible-playbook -i ./inventory.yml ./java-app/postgres-role.yml --private-key="$GCP_KEY"
-                        ansible-playbook -i ./inventory.yml ./java-app/mongodb-role.yml --private-key="$GCP_KEY"
-                    '''
+                dir('frontend') {
+                    echo 'Building frontend...'
+                    withEnv([
+                        "REACT_APP_API_BASE_URL=${env.REACT_APP_API_BASE_URL}"
+                    ])
+                    {
+                        sh 'npm install'
+                        sh 'npm run build'
+                    }
                 }
             }
         }
+        stage('Archive frontend') {
+            steps {
+                dir('frontend') {
+                    sh 'tar -czf build.tar.gz build'
+                    // archiveArtifacts(artifacts: 'frontend/build/**/*', followSymlinks: false)
+                    archiveArtifacts(artifacts: 'build.tar.gz', followSymlinks: false)
+                }
+            }
+        }
+        // stage('Run ansible') {
+        //     steps {
+        //         dir('ansible') {
+        //             sh '''
+        //                 ansible-playbook -i ./inventory.yml ./java-app/redis-role.yml --private-key="$GCP_KEY"
+        //                 ansible-playbook -i ./inventory.yml ./java-app/postgres-role.yml --private-key="$GCP_KEY"
+        //                 ansible-playbook -i ./inventory.yml ./java-app/mongodb-role.yml --private-key="$GCP_KEY"
+        //             '''
+        //         }
+        //     }
+        // }
     }
 }
