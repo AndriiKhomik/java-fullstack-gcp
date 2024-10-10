@@ -47,7 +47,7 @@ pipeline {
                         echo "tomcat_server=${backend_vm_ip}" >> ../.env
                         echo "postgres_server=${postgres_vm_ip}" >> ../.env
                         echo "redis_server=${redis_vm_ip}" >> ../.env
-                        echo "REACT_APP_API_BASE_URL=${backend_vm_ip}" >> ../.env
+                        echo "REACT_APP_API_BASE_URL=http://${backend_vm_ip}:8080" >> ../.env
                     '''
                 }
             }
