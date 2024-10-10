@@ -111,7 +111,7 @@ pipeline {
         stage('Copy files to appropriate folders') {
             steps {
                 script {
-                    sh "mv /var/lib/jenkins/jobs/artifacts-test/builds/${BUILD_NUMBER}/archive/build/libs /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/tomcat/files/ROOT.war" 
+                    sh "mv /var/lib/jenkins/jobs/artifacts-test/builds/${BUILD_NUMBER}/archive/build/libs/class_schedule.war /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/tomcat/files/ROOT.war" 
                     sh "mv /var/lib/jenkins/jobs/artifacts-test/builds/${BUILD_NUMBER}/archive/build.tar.gz /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx/files"
                     sh "tar -xzvf /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx/files/build.tar.gz -C /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx/files/"
                 }
