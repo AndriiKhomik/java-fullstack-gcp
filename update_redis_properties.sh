@@ -2,7 +2,7 @@
 
 new_value="$1"
 config_file="src/main/resources/cache.properties"
-
+pwd
 # Ensure the new value is provided
 if [ -z "$new_value" ]; then
     echo "Error: No value provided for redis.address."
