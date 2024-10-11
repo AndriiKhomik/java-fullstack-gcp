@@ -1,7 +1,7 @@
 #!/bin/bash
 
 new_value="$1"
-config_file="./src/main/resources/cache.properties"
+config_file="src/main/resources/cache.properties"
 
 # Ensure the new value is provided
 if [ -z "$new_value" ]; then
