@@ -50,6 +50,8 @@ pipeline {
                         echo "postgres_server=${postgres_vm_ip}" >> ../.env
                         echo "redis_server=${redis_vm_ip}" >> ../.env
                         echo "REACT_APP_API_BASE_URL=http://$backend_vm_ip:8080" >> ../.env
+                        ../update_postgres_properties.sh hibernate.connection.url=jdbc:postgresql://$postgres_vm_ip:5432/postgres
+                        ../update_redis_properties.sh redis.address=redis://$redis_vm_ip:6379
                     '''
                 }
             }
