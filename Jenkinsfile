@@ -56,76 +56,76 @@ pipeline {
                 }
             }
         }
-        stage('Change IPs in ansible config'){
-            steps {
-                sh './change_ips.sh .env ./ansible/inventory.yml'
-            }
-        }
-        stage('Add to known host') {
-            steps {
-                sh './add_to_known_hosts.sh .env'
-            }
-        }
-        stage('Build Backend') {
-            steps {
-                echo 'Building backend...'
-                withEnv([
-                    "POSTGRES_USER=${env.POSTGRES_USER}",
-                    "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}",
-                    "POSTGRES_DB=${env.POSTGRES_DB}",
-                    "MONGO_INITDB_ROOT_USERNAME=${env.MONGO_INITDB_ROOT_USERNAME}",
-                    "MONGO_INITDB_ROOT_PASSWORD=${env.MONGO_INITDB_ROOT_PASSWORD}",
-                ]) {
-                    sh 'gradle clean build -x test'
-                }
-            }
-        }
-        stage('Archive backend') {
-            steps {
-                archiveArtifacts(artifacts: '**/build/libs/*.war', followSymlinks: false)
-            }
-        }
-        stage('Build Frontend') {
-            steps {
-                dir('frontend') {
-                    echo 'Building frontend...'
-                    sh '''
-                        export $(grep -v '^#' ../.env | xargs)
-                        npm install
-                        npm run build
-                    '''
-                }
-            }
-        }
-        stage('Archive frontend') {
-            steps {
-                dir('frontend') {
-                    sh 'tar -czf build.tar.gz build'
-                    archiveArtifacts(artifacts: 'build.tar.gz', followSymlinks: false)
-                }
-            }
-        }
-        stage('Copy files to appropriate folders') {
-            steps {
-                script {
-                    sh "mv /var/lib/jenkins/jobs/artifacts-test/builds/${BUILD_NUMBER}/archive/build/libs/class_schedule.war /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/tomcat/files/ROOT.war" 
-                    sh "mv /var/lib/jenkins/jobs/artifacts-test/builds/${BUILD_NUMBER}/archive/build.tar.gz /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx/files"
-                    sh "tar -xzvf /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx/files/build.tar.gz -C /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx/files/"
-                }
-            }
-        }
-        stage('Run ansible') {
-            steps {
-                dir('ansible') {
-                    sh '''
-                        ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml --private-key="$GCP_KEY"
-                        ansible-playbook -i ./inventory.yml ./java-app/redis-role.yml --private-key="$GCP_KEY"
-                        ansible-playbook -i ./inventory.yml ./java-app/postgres-role.yml --private-key="$GCP_KEY"
-                        ansible-playbook -i ./inventory.yml ./java-app/mongodb-role.yml --private-key="$GCP_KEY"
-                        ansible-playbook -i ./inventory.yml ./java-app/tomcat-role.yml --private-key="$GCP_KEY"
-                    '''
-                }
-            }
-        }
+        // stage('Change IPs in ansible config'){
+        //     steps {
+        //         sh './change_ips.sh .env ./ansible/inventory.yml'
+        //     }
+        // }
+        // stage('Add to known host') {
+        //     steps {
+        //         sh './add_to_known_hosts.sh .env'
+        //     }
+        // }
+        // stage('Build Backend') {
+        //     steps {
+        //         echo 'Building backend...'
+        //         withEnv([
+        //             "POSTGRES_USER=${env.POSTGRES_USER}",
+        //             "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}",
+        //             "POSTGRES_DB=${env.POSTGRES_DB}",
+        //             "MONGO_INITDB_ROOT_USERNAME=${env.MONGO_INITDB_ROOT_USERNAME}",
+        //             "MONGO_INITDB_ROOT_PASSWORD=${env.MONGO_INITDB_ROOT_PASSWORD}",
+        //         ]) {
+        //             sh 'gradle clean build -x test'
+        //         }
+        //     }
+        // }
+        // stage('Archive backend') {
+        //     steps {
+        //         archiveArtifacts(artifacts: '**/build/libs/*.war', followSymlinks: false)
+        //     }
+        // }
+        // stage('Build Frontend') {
+        //     steps {
+        //         dir('frontend') {
+        //             echo 'Building frontend...'
+        //             sh '''
+        //                 export $(grep -v '^#' ../.env | xargs)
+        //                 npm install
+        //                 npm run build
+        //             '''
+        //         }
+        //     }
+        // }
+        // stage('Archive frontend') {
+        //     steps {
+        //         dir('frontend') {
+        //             sh 'tar -czf build.tar.gz build'
+        //             archiveArtifacts(artifacts: 'build.tar.gz', followSymlinks: false)
+        //         }
+        //     }
+        // }
+        // stage('Copy files to appropriate folders') {
+        //     steps {
+        //         script {
+        //             sh "mv /var/lib/jenkins/jobs/artifacts-test/builds/${BUILD_NUMBER}/archive/build/libs/class_schedule.war /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/tomcat/files/ROOT.war" 
+        //             sh "mv /var/lib/jenkins/jobs/artifacts-test/builds/${BUILD_NUMBER}/archive/build.tar.gz /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx/files"
+        //             sh "tar -xzvf /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx/files/build.tar.gz -C /var/lib/jenkins/workspace/artifacts-test/ansible/java-app/nginx/files/"
+        //         }
+        //     }
+        // }
+        // stage('Run ansible') {
+        //     steps {
+        //         dir('ansible') {
+        //             sh '''
+        //                 ansible-playbook -i ./inventory.yml ./java-app/nginx-role.yml --private-key="$GCP_KEY"
+        //                 ansible-playbook -i ./inventory.yml ./java-app/redis-role.yml --private-key="$GCP_KEY"
+        //                 ansible-playbook -i ./inventory.yml ./java-app/postgres-role.yml --private-key="$GCP_KEY"
+        //                 ansible-playbook -i ./inventory.yml ./java-app/mongodb-role.yml --private-key="$GCP_KEY"
+        //                 ansible-playbook -i ./inventory.yml ./java-app/tomcat-role.yml --private-key="$GCP_KEY"
+        //             '''
+        //         }
+        //     }
+        // }
     }
 }
