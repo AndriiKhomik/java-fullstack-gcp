@@ -23,6 +23,7 @@
     line: 'bind 0.0.0.0 ::1'
     state: present
     backup: yes
+  notify: Restart Redis
 
 - name: Start redis
   service:

@@ -1,0 +1,8 @@
+---
+- name: use grafana role playbook
+  hosts: grafanaservers
+  become: true
+
+  roles:
+    - role: grafana
+      system_manager: andrii.khomik@gmail.com

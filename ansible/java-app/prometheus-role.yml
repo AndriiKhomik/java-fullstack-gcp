@@ -1,0 +1,8 @@
+---
+- name: use prometheus role playbook
+  hosts: prometheusservers
+  become: true
+
+  roles:
+    - role: prometheus
+      system_manager: andrii.khomik@gmail.com
