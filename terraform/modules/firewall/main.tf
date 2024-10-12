@@ -106,3 +106,29 @@ resource "google_compute_firewall" "allow_icmp" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["icmp-allow"]
 }
+
+resource "google_compute_firewall" "grafana" {
+  name    = "grafana-firewall"
+  network = var.vpc_name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["3000"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["grafanafw"]
+}
+
+resource "google_compute_firewall" "prometheus" {
+  name    = "prometheus-firewall"
+  network = var.vpc_name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["9090"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["prometheusfw"]
+}
