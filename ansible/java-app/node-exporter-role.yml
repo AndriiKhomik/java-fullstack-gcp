@@ -1,0 +1,8 @@
+---
+- name: use node_exporter role playbook
+  hosts: node_exporter_servers
+  become: true
+
+  roles:
+    - role: node_exporter
+      system_manager: andrii.khomik@gmail.com

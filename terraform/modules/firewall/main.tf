@@ -132,3 +132,16 @@ resource "google_compute_firewall" "prometheus" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["prometheusfw"]
 }
+
+resource "google_compute_firewall" "node-exporter" {
+  name    = "node-exporter-firewall"
+  network = var.vpc_name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["9100"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["nodeexporterfw"]
+}
