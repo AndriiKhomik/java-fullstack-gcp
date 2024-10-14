@@ -1,7 +1,7 @@
 webservers:
   hosts:
     nginx_server:
-      ansible_host: 34.168.36.200
+      ansible_host: 34.88.238.210
       ansible_user: andrii_khomik
       ansible_ssh_private_key: ~/.ssh/id_rsa
       ansible_connection: ssh
@@ -41,7 +41,7 @@ postgresservers:
 grafanaservers:
   hosts:
     grafana_server:
-      ansible_host: 34.88.48.130
+      ansible_host: 34.88.238.210
       ansible_user: andrii_khomik
       ansible_ssh_private_key: ~/.ssh/id_rsa
       ansible_connection: ssh
@@ -49,12 +49,17 @@ grafanaservers:
 prometheusservers:
   hosts:
     prometheus_server:
-      ansible_host: 34.88.48.130
+      ansible_host: 34.88.122.129
       ansible_user: andrii_khomik
       ansible_ssh_private_key: ~/.ssh/id_rsa
       ansible_connection: ssh
 
 node_exporter_servers:
-  hosts: all
-  roles:
-    - node_exporter
+  hosts: 
+    node_exporter_server:
+      ansible_host: 34.88.122.129
+      ansible_user: andrii_khomik
+      ansible_ssh_private_key: ~/.ssh/id_rsa
+      ansible_connection: ssh
+
+
