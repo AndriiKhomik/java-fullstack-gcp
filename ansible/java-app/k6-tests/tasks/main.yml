@@ -1,0 +1,46 @@
+---
+- name: Install apt transport 
+  ansible.builtin.apt:
+    name: apt-transport-https
+    state: present
+
+- name: Add k6 apt key
+  ansible.builtin.apt_key:
+    url: https://dl.k6.io/key.gpg
+    state: present
+
+- name: Add k6 apt repository
+  ansible.builtin.apt_repository:
+    repo: deb https://dl.k6.io/deb stable main
+    state: present
+
+- name: Update apt and install k6
+  ansible.builtin.apt:
+    name: k6
+    update_cache: yes
+    state: present
+
+- name: Create directory for k6 test scripts
+  ansible.builtin.file:
+    path: /var/www/k6-tests
+    state: directory
+    owner: andrii_khomik
+    group: andrii_khomik
+    mode: '0755'
+
+- name: Copy k6 test script
+  copy:
+    src: files/load-test-script.js
+    dest: /var/www/k6-tests/load-test-script.js
+    owner: andrii_khomik
+    group: andrii_khomik
+    mode: '0644'
+
+- name: Run k6 load test
+  ansible.builtin.command:
+    cmd: k6 run /var/www/k6-tests/load-test-script.js
+  register: k6_output
+
+- name: Print k6 output
+  ansible.builtin.debug:
+    var: k6_output.stdout

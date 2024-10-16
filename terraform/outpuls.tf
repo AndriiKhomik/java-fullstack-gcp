@@ -18,6 +18,10 @@ output "redis_vm_ip" {
   value = module.redis.redis_vm_ip
 }
 
+output "grafana_prometheus_vm_ip" {
+  value = module.grafana-prometheus.grafana_prometheus_vm_ip
+}
+
 output "user_name" {
   value = var.user
 }

@@ -44,11 +44,16 @@ pipeline {
                         mongodb_vm_ip=$(terraform output -raw mongodb_vm_ip)
                         postgres_vm_ip=$(terraform output -raw postgres_vm_ip)
                         redis_vm_ip=$(terraform output -raw redis_vm_ip)
+                        grafana_prometheus_vm_ip=$(terraform output -raw grafana_prometheus_vm_ip)
                         echo "nginx_server=${frontend_vm_ip}" >> ../.env
                         echo "mongo_server=${mongodb_vm_ip}" >> ../.env
                         echo "tomcat_server=${backend_vm_ip}" >> ../.env
                         echo "postgres_server=${postgres_vm_ip}" >> ../.env
                         echo "redis_server=${redis_vm_ip}" >> ../.env
+                        echo "grafana_server=${grafana_prometheus_vm_ip}" >> ../.env
+                        echo "prometheus_server=${grafana_prometheus_vm_ip}" >> ../.env
+                        echo "node_exporter_server=${frontend_vm_ip}" >> ../.env
+                        echo "k6_tests_server=${grafana_prometheus_vm_ip}" >> ../.env
                         echo "REACT_APP_API_BASE_URL=http://$backend_vm_ip:8080" >> ../.env
                         ../update_postgres_properties.sh hibernate.connection.url=jdbc:postgresql://$postgres_vm_ip:5432/postgres
                         ../update_redis_properties.sh redis.address=redis://$redis_vm_ip:6379
@@ -122,6 +127,7 @@ pipeline {
                         ansible-playbook -i ./inventory.yml ./java-app/redis-role.yml --private-key="$GCP_KEY"
                         ansible-playbook -i ./inventory.yml ./java-app/postgres-role.yml --private-key="$GCP_KEY"
                         ansible-playbook -i ./inventory.yml ./java-app/mongodb-role.yml --private-key="$GCP_KEY"
+                        ansible-playbook -i ./inventory.yml ./java-app/tomcat-role.yml --private-key="$GCP_KEY"
                         ansible-playbook -i ./inventory.yml ./java-app/tomcat-role.yml --private-key="$GCP_KEY"
                     '''
                 }

@@ -1,0 +1,8 @@
+---
+- name: use k6 tests role playbook
+  hosts: k6_tests_servers
+  become: true
+
+  roles:
+    - role: k6-tests
+      system_manager: andrii.khomik@gmail.com

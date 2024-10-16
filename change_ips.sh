@@ -51,6 +51,18 @@ do
         redis_server)
         sed -i "/redis_server:/!b;n;c\      ansible_host: $value" "$TARGET_FILE"
         ;;
+        grafana_server)
+        sed -i "/redis_server:/!b;n;c\      ansible_host: $value" "$TARGET_FILE"
+        ;;
+        prometheus_server)
+        sed -i "/redis_server:/!b;n;c\      ansible_host: $value" "$TARGET_FILE"
+        ;;
+        node_exporter_server)
+        sed -i "/redis_server:/!b;n;c\      ansible_host: $value" "$TARGET_FILE"
+        ;;
+        k6_tests_server)
+        sed -i "/redis_server:/!b;n;c\      ansible_host: $value" "$TARGET_FILE"
+        ;;
         *)
         echo "Unknown key: $key. Skipping."
         ;;

@@ -4,7 +4,7 @@ resource "google_compute_instance" "webserver" {
   zone                      = "${var.region}-b"
   allow_stopping_for_update = true
 
-  tags = ["sshfw", "webserverfw", "icmp-allow", "nodeexporterfw"]
+  tags = ["sshfw", "webserverfw", "icmp-allow", "nodeexporterfw", "prometheusfw", "grafanafw"]
 
   boot_disk {
     initialize_params {
