@@ -32,6 +32,6 @@ variable "prefix" {
 variable "machine_type" {
   type        = string
   description = "Machine type"
-  # default     = "e2-standard-2"
-  default = "e2-medium"
+  default     = "e2-standard-2"
+  # default = "e2-medium"
 }
